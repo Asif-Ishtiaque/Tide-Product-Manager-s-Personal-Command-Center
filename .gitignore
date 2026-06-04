@@ -1,0 +1,12 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets — NEVER commit these
+proxy/.dev.vars
+proxy/.wrangler/
+proxy/node_modules/
+
+# Build artifacts
+dist/
+.output/

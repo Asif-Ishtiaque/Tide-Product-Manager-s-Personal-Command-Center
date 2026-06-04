@@ -1,0 +1,692 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PM Command Center</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root {
+    --ink:        #0c0e13;
+    --panel:      #14171f;
+    --panel-2:    #191d28;
+    --line:       #262b38;
+    --line-soft:  #1d212c;
+    --text:       #e7e9ef;
+    --text-dim:   #8b91a3;
+    --text-faint: #5a6072;
+
+    --amber:      #e8b04b;   /* primary / attention */
+    --amber-soft: #3a2f15;
+    --green:      #5ec98a;   /* on-track / done */
+    --red:        #e8685f;   /* blocked / overdue */
+    --blue:       #6aa6ff;   /* jira */
+    --violet:     #b48cff;   /* figma */
+    --cyan:       #54cfd1;   /* mention */
+
+    --r: 14px;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Bricolage Grotesque', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { background: var(--ink); color: var(--text); font-family: var(--sans); }
+
+  body {
+    min-height: 100vh;
+    padding: 22px clamp(16px, 3vw, 34px) 40px;
+    background:
+      radial-gradient(1200px 500px at 80% -10%, rgba(232,176,75,0.06), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(106,166,255,0.05), transparent 55%),
+      var(--ink);
+    position: relative;
+  }
+  /* grain */
+  body::after {
+    content: ""; position: fixed; inset: 0; pointer-events: none; opacity: 0.025; z-index: 999;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap { max-width: 1380px; margin: 0 auto; }
+
+  /* ── Top bar ───────────────────────────── */
+  header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; margin-bottom: 22px;
+    animation: rise .6s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .brand h1 {
+    font-size: clamp(26px, 3.2vw, 38px); font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+  }
+  .brand h1 .dot { color: var(--amber); }
+  .brand .sub {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--text-faint); margin-top: 9px;
+  }
+  .status {
+    display: flex; align-items: center; gap: 22px; font-family: var(--mono); font-size: 12px;
+  }
+  .status .clock { font-size: 22px; font-weight: 500; letter-spacing: .02em; }
+  .sync { display: flex; align-items: center; gap: 8px; color: var(--text-dim); }
+  .pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+    box-shadow: 0 0 0 0 rgba(94,201,138,.6); animation: pulse 2.4s infinite;
+  }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(94,201,138,.5)} 70%{box-shadow:0 0 0 7px rgba(94,201,138,0)} 100%{box-shadow:0 0 0 0 rgba(94,201,138,0)} }
+
+  .refresh {
+    display: grid; place-items: center; width: 34px; height: 34px;
+    border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2);
+    color: var(--text-dim); cursor: pointer; transition: all .15s ease;
+  }
+  .refresh:hover { color: var(--amber); border-color: var(--amber); background: var(--amber-soft); }
+  .refresh:active { transform: scale(.92); }
+  .refresh svg { width: 16px; height: 16px; }
+  .refresh.spinning svg { animation: spin .6s cubic-bezier(.4,0,.2,1); }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+  /* ── Metrics strip ─────────────────────── */
+  .metrics {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px;
+  }
+  .metric {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line-soft); border-radius: var(--r);
+    padding: 16px 18px; position: relative; overflow: hidden;
+    animation: rise .6s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .metric::before {
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--accent, var(--line));
+  }
+  .metric .label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .metric .val {
+    font-family: var(--mono); font-weight: 700; font-size: 30px; line-height: 1; margin-top: 12px; letter-spacing: -.01em;
+  }
+  .metric .val small { font-size: 14px; color: var(--text-dim); font-weight: 400; }
+  .metric .meta { font-size: 11.5px; color: var(--text-dim); margin-top: 7px; }
+
+  /* ── Layout grid ───────────────────────── */
+  .grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; }
+  .col { display: flex; flex-direction: column; gap: 14px; }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line-soft); border-radius: var(--r);
+    overflow: hidden; animation: rise .6s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .panel > .head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px; border-bottom: 1px solid var(--line-soft);
+  }
+  .panel > .head .t { display:flex; align-items:center; gap:10px; }
+  .panel > .head h2 {
+    font-size: 13px; font-weight: 600; letter-spacing: .02em;
+  }
+  .panel > .head .count {
+    font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+    border: 1px solid var(--line); border-radius: 20px; padding: 2px 9px;
+  }
+  .tag-src {
+    font-family: var(--mono); font-size: 9px; letter-spacing:.1em; text-transform:uppercase;
+    padding: 2px 7px; border-radius: 5px; font-weight: 700;
+  }
+  .src-jira  { color: var(--blue);   background: rgba(106,166,255,.12); }
+  .src-figma { color: var(--violet); background: rgba(180,140,255,.12); }
+
+  /* ── Attention feed ────────────────────── */
+  .feed { display: flex; flex-direction: column; }
+  .item {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 13px; align-items: start;
+    padding: 14px 18px; border-bottom: 1px solid var(--line-soft);
+    transition: background .15s ease; cursor: default;
+  }
+  .item:last-child { border-bottom: 0; }
+  .item:hover { background: var(--panel-2); }
+  .pri {
+    width: 6px; height: 6px; border-radius: 50%; margin-top: 7px; flex: none;
+  }
+  .pri.p0 { background: var(--red);   box-shadow: 0 0 8px rgba(232,104,95,.7); }
+  .pri.p1 { background: var(--amber); }
+  .pri.p2 { background: var(--text-faint); }
+  .item .body .top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom: 4px; }
+  .item .body .title { font-size: 14px; font-weight: 500; line-height: 1.35; }
+  .item .body .desc { font-size: 12.5px; color: var(--text-dim); line-height: 1.4; }
+  .item .key {
+    font-family: var(--mono); font-size: 10.5px; color: var(--text-faint);
+  }
+  .item .when {
+    font-family: var(--mono); font-size: 10.5px; color: var(--text-faint); white-space: nowrap; margin-top: 2px;
+  }
+  .chip {
+    font-size: 10px; font-family: var(--mono); letter-spacing:.04em; padding: 2px 7px; border-radius: 5px;
+    border: 1px solid var(--line); color: var(--text-dim);
+  }
+  .chip.mention { color: var(--cyan); border-color: rgba(84,207,209,.3); background: rgba(84,207,209,.08); }
+  .chip.blocked { color: var(--red);  border-color: rgba(232,104,95,.3); background: rgba(232,104,95,.08); }
+  .chip.review  { color: var(--amber);border-color: rgba(232,176,75,.3); background: rgba(232,176,75,.08); }
+
+  /* ── Sprint widget ─────────────────────── */
+  .sprint-body { padding: 18px; }
+  .sprint-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; }
+  .sprint-top .name { font-size: 14px; font-weight: 600; }
+  .sprint-top .days { font-family: var(--mono); font-size: 11px; color: var(--amber); }
+  .bar { height: 9px; border-radius: 6px; background: var(--line); overflow: hidden; display:flex; }
+  .bar i { display:block; height:100%; }
+  .bar .done { background: var(--green); }
+  .bar .prog { background: var(--blue); }
+  .bar .rev  { background: var(--amber); }
+  .legend { display:flex; gap:16px; margin-top:13px; flex-wrap:wrap; }
+  .legend span { font-family: var(--mono); font-size: 11px; color: var(--text-dim); display:flex; align-items:center; gap:6px; }
+  .legend i { width:8px; height:8px; border-radius:2px; display:inline-block; }
+
+  /* ── Compact activity rows ─────────────── */
+  .row {
+    display:flex; gap:11px; align-items:flex-start; padding: 11px 18px;
+    border-bottom: 1px solid var(--line-soft); transition: background .15s;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row:hover { background: var(--panel-2); }
+  .row .av {
+    width: 26px; height: 26px; border-radius: 7px; flex:none; display:grid; place-items:center;
+    font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--ink);
+  }
+  .row .txt { font-size: 12.5px; line-height: 1.4; color: var(--text); }
+  .row .txt b { font-weight: 600; }
+  .row .txt .m { color: var(--text-dim); }
+  .row .t2 { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-top:3px; }
+
+  .foot {
+    margin-top: 26px; text-align:center; font-family: var(--mono); font-size: 10.5px;
+    color: var(--text-faint); letter-spacing: .04em;
+  }
+  .foot b { color: var(--text-dim); }
+
+  @keyframes rise { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
+
+  @media (max-width: 980px) {
+    .grid { grid-template-columns: 1fr; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── Login Screen Overlay ──────────────── */
+  .login-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(12, 14, 19, 0.82);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .login-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .login-card {
+    background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 400px;
+    padding: 38px 34px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.03);
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .login-overlay.active .login-card {
+    transform: translateY(0);
+  }
+  .login-card h2 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .login-card h2 .dot {
+    color: var(--amber);
+  }
+  .login-card .desc {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    line-height: 1.4;
+  }
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .input-wrapper {
+    position: relative;
+    text-align: left;
+  }
+  .input-wrapper label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+  }
+  .login-input {
+    width: 100%;
+    height: 48px;
+    background: var(--panel-2);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 0 46px 0 16px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+  }
+  .login-input:focus {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(232, 176, 75, 0.12);
+  }
+  .toggle-btn {
+    position: absolute;
+    right: 14px;
+    bottom: 12px;
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 4px;
+    transition: color 0.15s;
+  }
+  .toggle-btn:hover {
+    color: var(--text-dim);
+  }
+  .toggle-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .login-btn {
+    height: 48px;
+    background: var(--amber);
+    color: var(--ink);
+    border: none;
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    margin-top: 6px;
+  }
+  .login-btn:hover {
+    opacity: 0.9;
+  }
+  .login-btn:active {
+    transform: scale(0.98);
+  }
+  .error-msg {
+    font-size: 13px;
+    color: var(--red);
+    margin-top: 8px;
+    text-align: left;
+    display: none;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Shake animation for incorrect password */
+  .shake {
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Command Center<span class="dot">.</span></h1>
+      <div class="sub">Jira × Figma · Personal Ops Board</div>
+    </div>
+    <div class="status">
+      <div class="sync"><span class="pulse"></span><span id="synced">synced just now</span></div>
+      <div class="clock" id="clock">--:--</div>
+      <button class="refresh" id="refresh" title="Refresh now" aria-label="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="metrics" id="metrics"></section>
+
+  <div class="grid">
+    <div class="col">
+      <section class="panel" style="animation-delay:.05s">
+        <div class="head">
+          <div class="t"><h2>⚑ Attention Required</h2></div>
+          <div class="count" id="attn-count">0</div>
+        </div>
+        <div class="feed" id="attention"></div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="panel" style="animation-delay:.1s">
+        <div class="head"><div class="t"><h2>Active Sprint</h2></div></div>
+        <div class="sprint-body" id="sprint"></div>
+      </section>
+
+      <section class="panel" style="animation-delay:.15s">
+        <div class="head">
+          <div class="t"><span class="tag-src src-jira">Jira</span><h2>Recent Activity</h2></div>
+          <div class="count" id="jira-count">0</div>
+        </div>
+        <div id="jira-feed"></div>
+      </section>
+
+      <section class="panel" style="animation-delay:.2s">
+        <div class="head">
+          <div class="t"><span class="tag-src src-figma">Figma</span><h2>Design Updates</h2></div>
+          <div class="count" id="figma-count">0</div>
+        </div>
+        <div id="figma-feed"></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="foot">DATA SOURCE: <b id="srcmode">MOCK</b> · swap to live by pointing CONFIG.proxyUrl at your token proxy</div>
+</div>
+
+<div class="login-overlay" id="login-overlay">
+  <div class="login-card" id="login-card">
+    <h2>Command Center<span class="dot">.</span></h2>
+    <div class="desc">This dashboard is protected. Enter your access token to continue.</div>
+    <form class="login-form" id="login-form">
+      <div class="input-wrapper">
+        <label for="passcode">Access Token</label>
+        <input type="password" id="passcode" class="login-input" autocomplete="current-password" placeholder="••••••••••••" required>
+        <button type="button" class="toggle-btn" id="toggle-password" aria-label="Toggle password visibility">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+      </div>
+      <button type="submit" class="login-btn">Unlock Dashboard</button>
+      <div class="error-msg" id="error-msg">Incorrect passcode. Please try again.</div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG  —  edit this block when you go live
+   ------------------------------------------------------------
+   A browser page CANNOT call Jira/Figma APIs directly (CORS).
+   Point proxyUrl at a tiny serverless proxy that holds your
+   API tokens and forwards requests. Until then, mode = 'mock'.
+   ============================================================ */
+const CONFIG = {
+  mode: 'live',                         // 'mock' | 'live'
+  proxyUrl: 'http://localhost:8787',
+  jira: { site: 'yourcompany.atlassian.net', currentUser: 'you@company.com' },
+  figma: { fileKeys: ['FIGMA_FILE_KEY_1', 'FIGMA_FILE_KEY_2'] },
+  refreshMs: 60000
+};
+
+let accessToken = localStorage.getItem('pm_access_token') || '';
+
+async function getData() {
+  if (CONFIG.mode === 'live') {
+    if (!accessToken) {
+      throw new Error('Unauthorized');
+    }
+    const headers = { 'Accept': 'application/json' };
+    headers['Authorization'] = `Bearer ${accessToken}`;
+    
+    const r = await fetch(CONFIG.proxyUrl, { headers });
+    if (r.status === 401) {
+      throw new Error('Unauthorized');
+    }
+    if (!r.ok) throw new Error('Proxy error: ' + r.status);
+    const data = await r.json();
+    if (data._errors && data._errors.length) console.warn('Proxy reported source errors:', data._errors);
+    return data;
+  }
+  return MOCK;
+}
+
+/* ---------- MOCK DATA (realistic PM week) ---------- */
+const MOCK = {
+  metrics: [
+    { label: 'Sprint Day',   val: '6', sub: '/ 10', meta: '4 days remaining', accent: 'var(--amber)' },
+    { label: 'On Track',     val: '78', sub: '%',    meta: '14 of 18 points done', accent: 'var(--green)' },
+    { label: 'Blockers',     val: '2',  sub: '',     meta: 'both waiting on you', accent: 'var(--red)' },
+    { label: 'My WIP',       val: '5',  sub: '',     meta: '2 over your limit', accent: 'var(--blue)' },
+    { label: 'In Review',    val: '3',  sub: '',     meta: '1 design, 2 PRs', accent: 'var(--violet)' },
+  ],
+  attention: [
+    { src:'jira',  pri:'p0', key:'PAY-412', title:'Checkout API returns 500 on retry', desc:'Moved to "Blocked" — needs your call on rollback vs hotfix.', chip:'blocked', when:'12m' },
+    { src:'figma', pri:'p0', key:'Checkout v3', title:'@you Priya left 4 comments on the new flow', desc:'"Confirm spacing on the error state before dev handoff?"', chip:'mention', when:'34m' },
+    { src:'jira',  pri:'p1', key:'PAY-398', title:'Approve scope change for refunds epic', desc:'Eng requesting 3 extra points — your sign-off pending.', chip:'review', when:'1h' },
+    { src:'figma', pri:'p1', key:'Onboarding', title:'Design ready for spec review', desc:'Marcus marked the onboarding screens ready for handoff.', chip:'review', when:'2h' },
+    { src:'jira',  pri:'p1', key:'PAY-401', title:'Stakeholder asked for status on payments dash', desc:'Comment from Dana — last update was 3 days ago.', chip:'mention', when:'3h' },
+    { src:'jira',  pri:'p2', key:'PAY-377', title:'QA flagged edge case in currency rounding', desc:'Low severity, but tagged you to triage for next sprint.', chip:null, when:'5h' },
+  ],
+  sprint: {
+    name: 'Payments — Sprint 24', daysLeft: 4,
+    done: 56, prog: 22, rev: 11, /* % of total points */
+    pointsDone: 14, pointsTotal: 18
+  },
+  jira: [
+    { who:'AB', color:'var(--blue)',   bold:'Aisha B.', txt:'transitioned PAY-410 to <b>In Review</b>', t:'18m' },
+    { who:'TK', color:'var(--green)',  bold:'Tom K.',   txt:'closed PAY-389 — <span class="m">Retry logic shipped</span>', t:'42m' },
+    { who:'DA', color:'var(--amber)',  bold:'Dana A.',  txt:'commented on PAY-401', t:'1h' },
+    { who:'JM', color:'var(--red)',    bold:'Jo M.',    txt:'flagged PAY-412 as <b>Blocked</b>', t:'1h' },
+    { who:'AB', color:'var(--blue)',   bold:'Aisha B.', txt:'logged 4h on PAY-398', t:'3h' },
+  ],
+  figma: [
+    { who:'PR', color:'var(--violet)', bold:'Priya R.',  txt:'published <b>Checkout v3</b> — 12 frames updated', t:'34m' },
+    { who:'MC', color:'var(--cyan)',   bold:'Marcus C.', txt:'marked <span class="m">Onboarding</span> ready for handoff', t:'2h' },
+    { who:'PR', color:'var(--violet)', bold:'Priya R.',  txt:'resolved 3 comments on Error States', t:'4h' },
+    { who:'SL', color:'var(--violet)', bold:'Sam L.',    txt:'created a new branch <span class="m">Dark mode</span>', t:'6h' },
+  ]
+};
+
+/* ---------- RENDER ---------- */
+const $ = s => document.querySelector(s);
+
+function renderMetrics(m){
+  $('#metrics').innerHTML = m.map(x => `
+    <div class="metric" style="--accent:${x.accent}">
+      <div class="label">${x.label}</div>
+      <div class="val">${x.val}<small>${x.sub}</small></div>
+      <div class="meta">${x.meta}</div>
+    </div>`).join('');
+}
+
+function renderAttention(items){
+  $('#attn-count').textContent = items.length;
+  $('#attention').innerHTML = items.map(it => `
+    <div class="item">
+      <span class="pri ${it.pri}"></span>
+      <div class="body">
+        <div class="top">
+          <span class="tag-src src-${it.src}">${it.src}</span>
+          <span class="key">${it.key}</span>
+          ${it.chip ? `<span class="chip ${it.chip}">${it.chip}</span>` : ''}
+        </div>
+        <div class="title">${it.title}</div>
+        <div class="desc">${it.desc}</div>
+      </div>
+      <div class="when">${it.when}</div>
+    </div>`).join('');
+}
+
+function renderSprint(s){
+  $('#sprint').innerHTML = `
+    <div class="sprint-top">
+      <span class="name">${s.name}</span>
+      <span class="days">${s.daysLeft}d left</span>
+    </div>
+    <div class="bar">
+      <i class="done" style="width:${s.done}%"></i>
+      <i class="prog" style="width:${s.prog}%"></i>
+      <i class="rev"  style="width:${s.rev}%"></i>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--green)"></i>Done</span>
+      <span><i style="background:var(--blue)"></i>In progress</span>
+      <span><i style="background:var(--amber)"></i>Review</span>
+      <span style="margin-left:auto;color:var(--text-faint)">${s.pointsDone}/${s.pointsTotal} pts</span>
+    </div>`;
+}
+
+function renderFeed(sel, countSel, rows){
+  $(countSel).textContent = rows.length;
+  $(sel).innerHTML = rows.map(r => `
+    <div class="row">
+      <div class="av" style="background:${r.color}">${r.who}</div>
+      <div>
+        <div class="txt"><b>${r.bold}</b> ${r.txt}</div>
+        <div class="t2">${r.t} ago</div>
+      </div>
+    </div>`).join('');
+}
+
+let isUnlocked = false;
+
+function showLogin(showError = false, message = '') {
+  const overlay = $('#login-overlay');
+  overlay.classList.add('active');
+  const errorMsg = $('#error-msg');
+  if (showError && message) {
+    errorMsg.textContent = message;
+    errorMsg.style.display = 'block';
+    $('#login-card').classList.add('shake');
+    setTimeout(() => $('#login-card').classList.remove('shake'), 400);
+  } else {
+    errorMsg.style.display = 'none';
+  }
+  $('#passcode').focus();
+}
+
+function hideLogin() {
+  $('#login-overlay').classList.remove('active');
+  $('#passcode').value = '';
+}
+
+async function render(){
+  try {
+    const d = await getData();
+    renderMetrics(d.metrics);
+    renderAttention(d.attention);
+    renderSprint(d.sprint);
+    renderFeed('#jira-feed', '#jira-count', d.jira);
+    renderFeed('#figma-feed', '#figma-count', d.figma);
+    $('#srcmode').textContent = CONFIG.mode.toUpperCase();
+    lastSync = Date.now();
+    updateSyncLabel();
+    isUnlocked = true;
+    hideLogin();
+  } catch (e) {
+    console.error('Render failed:', e);
+    if (e.message === 'Unauthorized') {
+      isUnlocked = false;
+      showLogin(accessToken !== '', 'Incorrect passcode. Please try again.');
+    } else {
+      if (!isUnlocked) {
+        showLogin(true, 'Connection failed. Is the proxy server running?');
+      } else {
+        $('#synced').textContent = 'sync failed';
+      }
+    }
+    throw e;
+  }
+}
+
+/* ---------- login form events ---------- */
+$('#login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const passcode = $('#passcode').value.trim();
+  accessToken = passcode;
+  
+  try {
+    await render();
+    if (isUnlocked) {
+      localStorage.setItem('pm_access_token', passcode);
+    }
+  } catch (err) {
+    accessToken = '';
+    localStorage.removeItem('pm_access_token');
+  }
+});
+
+$('#toggle-password').addEventListener('click', () => {
+  const input = $('#passcode');
+  const btn = $('#toggle-password');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+        <line x1="1" y1="1" x2="23" y2="23"></line>
+      </svg>
+    `;
+  } else {
+    input.type = 'password';
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+        <circle cx="12" cy="12" r="3"></circle>
+      </svg>
+    `;
+  }
+});
+
+/* ---------- clock + sync ---------- */
+let lastSync = Date.now();
+function updateSyncLabel(){
+  const s = Math.floor((Date.now() - lastSync) / 1000);
+  let txt = 'synced just now';
+  if (s >= 60) txt = `synced ${Math.floor(s/60)}m ago`;
+  else if (s >= 5) txt = `synced ${s}s ago`;
+  $('#synced').textContent = txt;
+}
+function tick(){
+  const n = new Date();
+  $('#clock').textContent = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  updateSyncLabel();
+}
+
+/* ---------- manual refresh ---------- */
+const btn = $('#refresh');
+btn.addEventListener('click', async () => {
+  if (btn.classList.contains('spinning')) return;
+  btn.classList.add('spinning');
+  await render();
+  setTimeout(() => btn.classList.remove('spinning'), 600);
+});
+
+setInterval(tick, 1000); tick();
+render();
+setInterval(render, CONFIG.refreshMs);
+</script>

@@ -1,0 +1,20 @@
+# Copy this file to ".dev.vars" (same folder) and fill in YOUR values.
+# .dev.vars is gitignored — your tokens stay on your machine, never committed.
+
+JIRA_SITE=yourcompany.atlassian.net
+JIRA_EMAIL=you@company.com
+JIRA_TOKEN=your-atlassian-api-token
+JIRA_PROJECT=PAY
+
+# optional — enables the sprint widget
+JIRA_BOARD_ID=
+JIRA_POINTS_FIELD=
+
+FIGMA_TOKEN=your-figma-personal-access-token
+FIGMA_FILES=ABC123xyz,DEF456uvw
+
+# optional — restrict who can read the proxy (defaults to *)
+ALLOW_ORIGIN=*
+
+# Login access token — anyone who opens the dashboard must enter this to unlock it
+ACCESS_TOKEN=your-secret-dashboard-password
