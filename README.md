@@ -1,9 +1,10 @@
-# PM Command Center
+# Tide
 
-A personal Jira × Figma ops dashboard. Two parts:
+A personal ops dashboard that unifies Jira × Figma × ClickUp × Slack into one
+prioritized attention feed. Two parts:
 
 ```
-pm-command-center/
+tide/
 ├── dashboard/index.html   ← the board (static, runs in any browser)
 ├── proxy/                 ← Cloudflare Worker that holds your tokens
 │   ├── worker.js
@@ -65,7 +66,7 @@ npx wrangler secret put JIRA_TOKEN
 npx wrangler secret put JIRA_PROJECT
 npx wrangler secret put FIGMA_TOKEN
 npx wrangler secret put FIGMA_FILES
-npx wrangler deploy                   # prints https://pm-proxy.<you>.workers.dev
+npx wrangler deploy                   # prints https://tide-proxy.<you>.workers.dev
 ```
 Point `CONFIG.proxyUrl` at that URL. Host `dashboard/` free on Cloudflare Pages,
 Netlify Drop, or GitHub Pages. See SETUP.md for token sources + troubleshooting.

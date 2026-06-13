@@ -1,5 +1,5 @@
 {
-  "name": "pm-proxy",
+  "name": "tide-proxy",
   "private": true,
   "scripts": {
     "dev": "wrangler dev",

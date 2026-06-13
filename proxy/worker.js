@@ -1,5 +1,5 @@
 /* ============================================================
-   PM Command Center — data proxy (Cloudflare Worker)
+   Tide — data proxy (Cloudflare Worker)
    ------------------------------------------------------------
    Holds your API tokens as SECRETS (set via wrangler, never in
    code), calls Jira + Figma server-side, and returns ONE JSON

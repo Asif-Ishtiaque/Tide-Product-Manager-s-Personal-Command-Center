@@ -35,7 +35,7 @@ wrangler login
 
 Create the project and drop in the file:
 ```bash
-mkdir pm-proxy && cd pm-proxy
+mkdir tide-proxy && cd tide-proxy
 npm create cloudflare@latest . -- --type=hello-world
 # replace the generated src/index.js with worker.js (contents from this build)
 ```
@@ -61,20 +61,21 @@ Deploy:
 ```bash
 wrangler deploy
 ```
-Copy the URL it prints, e.g. `https://pm-proxy.you.workers.dev`.
+Copy the URL it prints, e.g. `https://tide-proxy.you.workers.dev`.
 
 ---
 
 ## 3. Point the dashboard at it
 
-Open `pm-command-center.html` and edit the CONFIG block at the top of the script:
+Open `dashboard/index.html` and edit the CONFIG block at the top of the script:
 ```js
 const CONFIG = {
-  mode: 'live',                                   // was 'mock'
-  proxyUrl: 'https://pm-proxy.you.workers.dev',   // your Worker URL
-  refreshMs: 60000
+  proxyUrl: 'https://tide-proxy.you.workers.dev',   // your Worker URL
+  refreshMs: 60000,
 };
 ```
+Sign in (or "Explore the demo"), open **Settings**, and **Test connection** —
+a green check confirms the proxy is serving your data.
 Save, open the file (or your hosted copy). The badge at the bottom should read
 **LIVE** and the board fills with your real data. The refresh button and the
 60-second auto-refresh both pull live now.

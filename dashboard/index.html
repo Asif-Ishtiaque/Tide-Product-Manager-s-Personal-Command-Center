@@ -1,382 +1,1361 @@
 <!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PM Command Center</title>
+<title>Tide — Personal Ops Board</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
   :root {
-    --ink:        #0c0e13;
-    --panel:      #14171f;
-    --panel-2:    #191d28;
-    --line:       #262b38;
-    --line-soft:  #1d212c;
-    --text:       #e7e9ef;
-    --text-dim:   #8b91a3;
+    --ink: #0c0e13;
+    --panel: #14171f;
+    --panel-2: #191d28;
+    --line: #262b38;
+    --line-soft: #1d212c;
+    --text: #e7e9ef;
+    --text-dim: #8b91a3;
     --text-faint: #5a6072;
 
-    --amber:      #e8b04b;   /* primary / attention */
+    --amber: #e8b04b;
+    /* primary / attention */
     --amber-soft: #3a2f15;
-    --green:      #5ec98a;   /* on-track / done */
-    --red:        #e8685f;   /* blocked / overdue */
-    --blue:       #6aa6ff;   /* jira */
-    --violet:     #b48cff;   /* figma */
-    --cyan:       #54cfd1;   /* mention */
-    --pink:       #f178b6;   /* clickup */
-    --sky:        #4ec0f5;   /* slack */
+    --green: #5ec98a;
+    /* on-track / done */
+    --red: #e8685f;
+    /* blocked / overdue */
+    --blue: #6aa6ff;
+    /* jira */
+    --violet: #b48cff;
+    /* figma */
+    --cyan: #54cfd1;
+    /* mention */
+    --pink: #f178b6;
+    /* clickup */
+    --sky: #4ec0f5;
+    /* slack */
 
     --r: 14px;
     --mono: 'JetBrains Mono', ui-monospace, monospace;
     --sans: 'Bricolage Grotesque', system-ui, sans-serif;
   }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-  html, body { background: var(--ink); color: var(--text); font-family: var(--sans); }
+  html,
+  body {
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--sans);
+  }
 
   body {
     min-height: 100vh;
     padding: 22px clamp(16px, 3vw, 34px) 40px;
     background:
-      radial-gradient(1200px 500px at 80% -10%, rgba(232,176,75,0.06), transparent 60%),
-      radial-gradient(900px 600px at -10% 110%, rgba(106,166,255,0.05), transparent 55%),
+      radial-gradient(1200px 500px at 80% -10%, rgba(232, 176, 75, 0.06), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(106, 166, 255, 0.05), transparent 55%),
       var(--ink);
     position: relative;
   }
+
   /* grain */
   body::after {
-    content: ""; position: fixed; inset: 0; pointer-events: none; opacity: 0.025; z-index: 999;
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    z-index: 999;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
-  .wrap { max-width: 1380px; margin: 0 auto; }
+  .wrap {
+    max-width: 1380px;
+    margin: 0 auto;
+  }
 
   /* ── Top bar ───────────────────────────── */
   header {
-    display: flex; align-items: flex-end; justify-content: space-between;
-    gap: 20px; flex-wrap: wrap; margin-bottom: 22px;
-    animation: rise .6s cubic-bezier(.2,.8,.2,1) both;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+    animation: rise .6s cubic-bezier(.2, .8, .2, 1) both;
   }
+
   .brand h1 {
-    font-size: clamp(26px, 3.2vw, 38px); font-weight: 700; letter-spacing: -0.02em; line-height: 1;
+    font-size: clamp(26px, 3.2vw, 38px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1;
   }
-  .brand h1 .dot { color: var(--amber); }
+
+  .brand h1 .dot {
+    color: var(--amber);
+  }
+
   .brand .sub {
-    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
-    color: var(--text-faint); margin-top: 9px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-top: 9px;
   }
+
   .status {
-    display: flex; align-items: center; gap: 16px; font-family: var(--mono); font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
   }
-  .status .clock { font-size: 22px; font-weight: 500; letter-spacing: .02em; }
-  .sync { display: flex; align-items: center; gap: 8px; color: var(--text-dim); }
+
+  .status .clock {
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: .02em;
+  }
+
+  .sync {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+  }
+
   .pulse {
-    width: 8px; height: 8px; border-radius: 50%; background: var(--green);
-    box-shadow: 0 0 0 0 rgba(94,201,138,.6); animation: pulse 2.4s infinite;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(94, 201, 138, .6);
+    animation: pulse 2.4s infinite;
   }
-  @keyframes pulse { 0%{box-shadow:0 0 0 0 rgba(94,201,138,.5)} 70%{box-shadow:0 0 0 7px rgba(94,201,138,0)} 100%{box-shadow:0 0 0 0 rgba(94,201,138,0)} }
+
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(94, 201, 138, .5)
+    }
+
+    70% {
+      box-shadow: 0 0 0 7px rgba(94, 201, 138, 0)
+    }
+
+    100% {
+      box-shadow: 0 0 0 0 rgba(94, 201, 138, 0)
+    }
+  }
 
   .iconbtn {
-    display: grid; place-items: center; width: 34px; height: 34px;
-    border-radius: 9px; border: 1px solid var(--line); background: var(--panel-2);
-    color: var(--text-dim); cursor: pointer; transition: all .15s ease;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .15s ease;
   }
-  .iconbtn:hover { color: var(--amber); border-color: var(--amber); background: var(--amber-soft); }
-  .iconbtn:active { transform: scale(.92); }
-  .iconbtn svg { width: 16px; height: 16px; }
-  .iconbtn.spinning svg { animation: spin .6s cubic-bezier(.4,0,.2,1); }
-  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+  .iconbtn:hover {
+    color: var(--amber);
+    border-color: var(--amber);
+    background: var(--amber-soft);
+  }
+
+  .iconbtn:active {
+    transform: scale(.92);
+  }
+
+  .iconbtn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .iconbtn.spinning svg {
+    animation: spin .6s cubic-bezier(.4, 0, .2, 1);
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
   /* ── View toggle (All / My Day) ────────── */
   .viewtoggle {
-    display: inline-flex; border: 1px solid var(--line); border-radius: 9px;
-    overflow: hidden; background: var(--panel-2);
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--panel-2);
   }
+
   .viewtoggle button {
-    font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
-    background: none; border: none; color: var(--text-dim); padding: 8px 14px; cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    padding: 8px 14px;
+    cursor: pointer;
     transition: all .15s ease;
   }
-  .viewtoggle button.active { background: var(--amber); color: var(--ink); font-weight: 700; }
-  .viewtoggle button:not(.active):hover { color: var(--text); }
+
+  .viewtoggle button.active {
+    background: var(--amber);
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .viewtoggle button:not(.active):hover {
+    color: var(--text);
+  }
+
+  /* ── Source tabs (All Boards / Jira / Figma / …) ─── */
+  .tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line-soft);
+    animation: rise .5s ease both;
+  }
+
+  .tabs button {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .03em;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    padding: 11px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color .15s;
+  }
+
+  .tabs button:hover {
+    color: var(--text);
+  }
+
+  .tabs button.active {
+    color: var(--text);
+    border-bottom-color: var(--amber);
+  }
+
+  .tabs .dot-src {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .tabs .badge {
+    font-size: 10px;
+    color: var(--text-faint);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1px 7px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  .tabs button.active .badge {
+    color: var(--amber);
+    border-color: rgba(232, 176, 75, .4);
+  }
 
   /* ── Demo banner ───────────────────────── */
   .demobar {
-    display: none; align-items: center; gap: 12px; justify-content: center;
-    background: linear-gradient(90deg, rgba(232,176,75,.14), rgba(180,140,255,.12));
-    border: 1px solid rgba(232,176,75,.3); border-radius: 10px;
-    padding: 9px 16px; margin-bottom: 16px; font-size: 12.5px; color: var(--text-dim);
+    display: none;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    background: linear-gradient(90deg, rgba(232, 176, 75, .14), rgba(180, 140, 255, .12));
+    border: 1px solid rgba(232, 176, 75, .3);
+    border-radius: 10px;
+    padding: 9px 16px;
+    margin-bottom: 16px;
+    font-size: 12.5px;
+    color: var(--text-dim);
     animation: rise .5s ease both;
   }
-  .demobar.show { display: flex; }
-  .demobar b { color: var(--amber); }
-  .demobar button {
-    font-family: var(--mono); font-size: 11px; background: var(--amber); color: var(--ink);
-    border: none; border-radius: 7px; padding: 6px 11px; cursor: pointer; font-weight: 700;
+
+  .demobar.show {
+    display: flex;
   }
-  .demobar button:hover { opacity: .9; }
+
+  .demobar b {
+    color: var(--amber);
+  }
+
+  .demobar button {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--amber);
+    color: var(--ink);
+    border: none;
+    border-radius: 7px;
+    padding: 6px 11px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .demobar button:hover {
+    opacity: .9;
+  }
 
   /* ── Metrics strip ─────────────────────── */
   .metrics {
-    display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 14px;
   }
+
   .metric {
     background: linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid var(--line-soft); border-radius: var(--r);
-    padding: 16px 18px; position: relative; overflow: hidden;
-    animation: rise .6s cubic-bezier(.2,.8,.2,1) both;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r);
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    animation: rise .6s cubic-bezier(.2, .8, .2, 1) both;
   }
+
   .metric::before {
-    content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--accent, var(--line));
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--accent, var(--line));
   }
+
   .metric .label {
-    font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
     color: var(--text-faint);
   }
+
   .metric .val {
-    font-family: var(--mono); font-weight: 700; font-size: 30px; line-height: 1; margin-top: 12px; letter-spacing: -.01em;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1;
+    margin-top: 12px;
+    letter-spacing: -.01em;
   }
-  .metric .val small { font-size: 14px; color: var(--text-dim); font-weight: 400; }
-  .metric .meta { font-size: 11.5px; color: var(--text-dim); margin-top: 7px; }
+
+  .metric .val small {
+    font-size: 14px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  .metric .meta {
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-top: 7px;
+  }
 
   /* ── Layout grid ───────────────────────── */
-  .grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 14px; }
-  .col { display: flex; flex-direction: column; gap: 14px; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 14px;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
 
   .panel {
-    background: var(--panel); border: 1px solid var(--line-soft); border-radius: var(--r);
-    overflow: hidden; animation: rise .6s cubic-bezier(.2,.8,.2,1) both;
+    background: var(--panel);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r);
+    overflow: hidden;
+    animation: rise .6s cubic-bezier(.2, .8, .2, 1) both;
   }
-  .panel > .head {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 18px; border-bottom: 1px solid var(--line-soft);
+
+  .panel>.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line-soft);
   }
-  .panel > .head .t { display:flex; align-items:center; gap:10px; }
-  .panel > .head h2 {
-    font-size: 13px; font-weight: 600; letter-spacing: .02em;
+
+  .panel>.head .t {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-  .panel > .head .count {
-    font-family: var(--mono); font-size: 11px; color: var(--text-faint);
-    border: 1px solid var(--line); border-radius: 20px; padding: 2px 9px;
+
+  .panel>.head h2 {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .02em;
   }
+
+  .panel>.head .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 2px 9px;
+  }
+
   .tag-src {
-    font-family: var(--mono); font-size: 9px; letter-spacing:.1em; text-transform:uppercase;
-    padding: 2px 7px; border-radius: 5px; font-weight: 700;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-weight: 700;
   }
-  .src-jira    { color: var(--blue);   background: rgba(106,166,255,.12); }
-  .src-figma   { color: var(--violet); background: rgba(180,140,255,.12); }
-  .src-clickup { color: var(--pink);   background: rgba(241,120,182,.12); }
-  .src-slack   { color: var(--sky);    background: rgba(78,192,245,.12); }
+
+  .src-jira {
+    color: var(--blue);
+    background: rgba(106, 166, 255, .12);
+  }
+
+  .src-figma {
+    color: var(--violet);
+    background: rgba(180, 140, 255, .12);
+  }
+
+  .src-clickup {
+    color: var(--pink);
+    background: rgba(241, 120, 182, .12);
+  }
+
+  .src-slack {
+    color: var(--sky);
+    background: rgba(78, 192, 245, .12);
+  }
 
   /* ── Attention feed ────────────────────── */
-  .feed { display: flex; flex-direction: column; }
-  .empty { padding: 40px 18px; text-align: center; color: var(--text-faint); font-size: 13px; }
+  .feed {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .empty {
+    padding: 40px 18px;
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 13px;
+  }
+
   .item {
-    display: grid; grid-template-columns: auto 1fr auto; gap: 13px; align-items: start;
-    padding: 14px 18px; border-bottom: 1px solid var(--line-soft);
-    transition: background .15s ease; cursor: pointer;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 13px;
+    align-items: start;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line-soft);
+    transition: background .15s ease;
+    cursor: pointer;
   }
-  .item:last-child { border-bottom: 0; }
-  .item:hover { background: var(--panel-2); }
+
+  .item:last-child {
+    border-bottom: 0;
+  }
+
+  .item:hover {
+    background: var(--panel-2);
+  }
+
   .pri {
-    width: 6px; height: 6px; border-radius: 50%; margin-top: 7px; flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex: none;
   }
-  .pri.p0 { background: var(--red);   box-shadow: 0 0 8px rgba(232,104,95,.7); }
-  .pri.p1 { background: var(--amber); }
-  .pri.p2 { background: var(--text-faint); }
-  .item .body .top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom: 4px; }
-  .item .body .title { font-size: 14px; font-weight: 500; line-height: 1.35; }
-  .item .body .desc { font-size: 12.5px; color: var(--text-dim); line-height: 1.4; }
+
+  .pri.p0 {
+    background: var(--red);
+    box-shadow: 0 0 8px rgba(232, 104, 95, .7);
+  }
+
+  .pri.p1 {
+    background: var(--amber);
+  }
+
+  .pri.p2 {
+    background: var(--text-faint);
+  }
+
+  .item .body .top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+
+  .item .body .title {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .item .body .desc {
+    font-size: 12.5px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+
   .item .key {
-    font-family: var(--mono); font-size: 10.5px; color: var(--text-faint);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-faint);
   }
+
   .item .when {
-    font-family: var(--mono); font-size: 10.5px; color: var(--text-faint); white-space: nowrap; margin-top: 2px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-faint);
+    white-space: nowrap;
+    margin-top: 2px;
   }
+
   .chip {
-    font-size: 10px; font-family: var(--mono); letter-spacing:.04em; padding: 2px 7px; border-radius: 5px;
-    border: 1px solid var(--line); color: var(--text-dim);
+    font-size: 10px;
+    font-family: var(--mono);
+    letter-spacing: .04em;
+    padding: 2px 7px;
+    border-radius: 5px;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
   }
-  .chip.mention, .chip.reply { color: var(--cyan); border-color: rgba(84,207,209,.3); background: rgba(84,207,209,.08); }
-  .chip.blocked, .chip.overdue { color: var(--red);  border-color: rgba(232,104,95,.3); background: rgba(232,104,95,.08); }
-  .chip.review, .chip.due  { color: var(--amber);border-color: rgba(232,176,75,.3); background: rgba(232,176,75,.08); }
+
+  .chip.mention,
+  .chip.reply {
+    color: var(--cyan);
+    border-color: rgba(84, 207, 209, .3);
+    background: rgba(84, 207, 209, .08);
+  }
+
+  .chip.blocked,
+  .chip.overdue {
+    color: var(--red);
+    border-color: rgba(232, 104, 95, .3);
+    background: rgba(232, 104, 95, .08);
+  }
+
+  .chip.review,
+  .chip.due {
+    color: var(--amber);
+    border-color: rgba(232, 176, 75, .3);
+    background: rgba(232, 176, 75, .08);
+  }
 
   /* SLA / staleness flag */
   .sla {
-    font-size: 9.5px; font-family: var(--mono); letter-spacing:.06em; text-transform: uppercase;
-    padding: 2px 6px; border-radius: 5px; font-weight: 700; display:inline-flex; align-items:center; gap:4px;
+    font-size: 9.5px;
+    font-family: var(--mono);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
-  .sla.breach { color: var(--red);   background: rgba(232,104,95,.14); }
-  .sla.warn   { color: var(--amber); background: rgba(232,176,75,.14); }
-  .sla::before { content:""; width:5px; height:5px; border-radius:50%; background: currentColor; }
+
+  .sla.breach {
+    color: var(--red);
+    background: rgba(232, 104, 95, .14);
+  }
+
+  .sla.warn {
+    color: var(--amber);
+    background: rgba(232, 176, 75, .14);
+  }
+
+  .sla::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
 
   /* link affordance + count */
   .linkbadge {
-    font-family: var(--mono); font-size: 10px; color: var(--text-faint);
-    display:inline-flex; align-items:center; gap:4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
-  .linkbadge svg { width: 12px; height: 12px; }
+
+  .linkbadge svg {
+    width: 12px;
+    height: 12px;
+  }
 
   /* expanded context drawer under an item */
   .context {
-    grid-column: 1 / -1; margin-top: 10px; padding: 12px; border-radius: 10px;
-    background: var(--panel-2); border: 1px solid var(--line-soft);
-    display: none; flex-direction: column; gap: 8px;
+    grid-column: 1 / -1;
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--line-soft);
+    display: none;
+    flex-direction: column;
+    gap: 8px;
   }
-  .context.open { display: flex; animation: fadeIn .2s ease; }
-  .ctx-title { font-family: var(--mono); font-size: 10px; letter-spacing:.1em; text-transform:uppercase; color: var(--text-faint); }
+
+  .context.open {
+    display: flex;
+    animation: fadeIn .2s ease;
+  }
+
+  .ctx-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
   .ctx-link {
-    display:flex; align-items:center; gap:10px; padding: 8px 10px; border-radius: 8px;
-    background: var(--panel); border: 1px solid var(--line-soft); font-size: 12.5px;
-    text-decoration: none; color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line-soft);
+    font-size: 12.5px;
+    text-decoration: none;
+    color: var(--text);
   }
-  .ctx-link:hover { border-color: var(--line); }
-  .ctx-link .x { margin-left:auto; color: var(--text-faint); cursor:pointer; font-family: var(--mono); }
-  .ctx-link .x:hover { color: var(--red); }
-  .ctx-add { display:flex; gap:8px; flex-wrap:wrap; }
+
+  .ctx-link:hover {
+    border-color: var(--line);
+  }
+
+  .ctx-link .x {
+    margin-left: auto;
+    color: var(--text-faint);
+    cursor: pointer;
+    font-family: var(--mono);
+  }
+
+  .ctx-link .x:hover {
+    color: var(--red);
+  }
+
+  .ctx-add {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
   .ctx-add button {
-    font-family: var(--mono); font-size: 11px; background: var(--panel); color: var(--text-dim);
-    border: 1px dashed var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--panel);
+    color: var(--text-dim);
+    border: 1px dashed var(--line);
+    border-radius: 7px;
+    padding: 6px 10px;
+    cursor: pointer;
   }
-  .ctx-add button:hover { color: var(--amber); border-color: var(--amber); }
+
+  .ctx-add button:hover {
+    color: var(--amber);
+    border-color: var(--amber);
+  }
 
   /* ── Sprint widget ─────────────────────── */
-  .sprint-body { padding: 18px; }
-  .sprint-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; }
-  .sprint-top .name { font-size: 14px; font-weight: 600; }
-  .sprint-top .days { font-family: var(--mono); font-size: 11px; color: var(--amber); }
-  .bar { height: 9px; border-radius: 6px; background: var(--line); overflow: hidden; display:flex; }
-  .bar i { display:block; height:100%; }
-  .bar .done { background: var(--green); }
-  .bar .prog { background: var(--blue); }
-  .bar .rev  { background: var(--amber); }
-  .legend { display:flex; gap:16px; margin-top:13px; flex-wrap:wrap; }
-  .legend span { font-family: var(--mono); font-size: 11px; color: var(--text-dim); display:flex; align-items:center; gap:6px; }
-  .legend i { width:8px; height:8px; border-radius:2px; display:inline-block; }
+  .sprint-body {
+    padding: 18px;
+  }
+
+  .sprint-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+
+  .sprint-top .name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .sprint-top .days {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--amber);
+  }
+
+  .bar {
+    height: 9px;
+    border-radius: 6px;
+    background: var(--line);
+    overflow: hidden;
+    display: flex;
+  }
+
+  .bar i {
+    display: block;
+    height: 100%;
+  }
+
+  .bar .done {
+    background: var(--green);
+  }
+
+  .bar .prog {
+    background: var(--blue);
+  }
+
+  .bar .rev {
+    background: var(--amber);
+  }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 13px;
+    flex-wrap: wrap;
+  }
+
+  .legend span {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .legend i {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    display: inline-block;
+  }
 
   /* ── Compact activity rows ─────────────── */
   .row {
-    display:flex; gap:11px; align-items:flex-start; padding: 11px 18px;
-    border-bottom: 1px solid var(--line-soft); transition: background .15s;
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    padding: 11px 18px;
+    border-bottom: 1px solid var(--line-soft);
+    transition: background .15s;
   }
-  .row:last-child { border-bottom: 0; }
-  .row:hover { background: var(--panel-2); }
+
+  .row:last-child {
+    border-bottom: 0;
+  }
+
+  .row:hover {
+    background: var(--panel-2);
+  }
+
   .row .av {
-    width: 26px; height: 26px; border-radius: 7px; flex:none; display:grid; place-items:center;
-    font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--ink);
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink);
   }
-  .row .txt { font-size: 12.5px; line-height: 1.4; color: var(--text); }
-  .row .txt b { font-weight: 600; }
-  .row .txt .m { color: var(--text-dim); }
-  .row .t2 { font-family: var(--mono); font-size: 10px; color: var(--text-faint); margin-top:3px; }
+
+  .row .txt {
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--text);
+  }
+
+  .row .txt b {
+    font-weight: 600;
+  }
+
+  .row .txt .m {
+    color: var(--text-dim);
+  }
+
+  .row .t2 {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 3px;
+  }
 
   .foot {
-    margin-top: 26px; text-align:center; font-family: var(--mono); font-size: 10.5px;
-    color: var(--text-faint); letter-spacing: .04em;
+    margin-top: 26px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-faint);
+    letter-spacing: .04em;
   }
-  .foot b { color: var(--text-dim); }
 
-  @keyframes rise { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  .foot b {
+    color: var(--text-dim);
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
   @media (max-width: 980px) {
-    .grid { grid-template-columns: 1fr; }
-    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .metrics {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   /* ── Overlay scaffold (login + wizard) ─── */
   .overlay {
-    position: fixed; inset: 0; z-index: 10000;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
     background: rgba(12, 14, 19, 0.82);
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
-    display: grid; place-items: center; padding: 24px;
-    opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
   }
-  .overlay.active { opacity: 1; pointer-events: all; }
+
+  .overlay.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
   .card {
     background: linear-gradient(180deg, var(--panel-2), var(--panel));
-    border: 1px solid var(--line); border-radius: 20px;
-    width: 100%; max-width: 420px; padding: 38px 34px;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.03);
-    text-align: center; transform: translateY(20px);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    padding: 38px 34px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    text-align: center;
+    transform: translateY(20px);
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
-  .overlay.active .card { transform: translateY(0); }
-  .card.wide { max-width: 560px; text-align: left; }
-  .card h2 { font-size: 26px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; }
-  .card h2 .dot { color: var(--amber); }
-  .card .desc { font-size: 13.5px; color: var(--text-dim); margin-bottom: 26px; line-height: 1.45; }
 
-  .login-form { display: flex; flex-direction: column; gap: 14px; }
-  .input-wrapper { position: relative; text-align: left; }
+  .overlay.active .card {
+    transform: translateY(0);
+  }
+
+  .card.wide {
+    max-width: 560px;
+    text-align: left;
+  }
+
+  .card h2 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .card h2 .dot {
+    color: var(--amber);
+  }
+
+  .card .desc {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    margin-bottom: 26px;
+    line-height: 1.45;
+  }
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .input-wrapper {
+    position: relative;
+    text-align: left;
+  }
+
   .input-wrapper label {
-    display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--text-faint); margin-bottom: 8px;
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 8px;
   }
-  .login-input {
-    width: 100%; height: 48px; background: var(--panel-2); border: 1.5px solid var(--line);
-    border-radius: 10px; padding: 0 16px; color: var(--text); font-family: var(--mono);
-    font-size: 15px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-  }
-  .login-input:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(232, 176, 75, 0.12); }
-  .btn {
-    height: 48px; background: var(--amber); color: var(--ink); border: none; border-radius: 10px;
-    font-family: var(--sans); font-size: 15px; font-weight: 700; cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s; display:grid; place-items:center;
-  }
-  .btn:hover { opacity: 0.9; }
-  .btn:active { transform: scale(0.98); }
-  .btn.ghost { background: var(--panel-2); color: var(--text); border: 1.5px solid var(--line); }
-  .btn.ghost:hover { border-color: var(--text-dim); opacity: 1; }
-  .btn.google { background: #fff; color: #1a1a1a; gap: 10px; display:flex; align-items:center; justify-content:center; }
-  .divider { display:flex; align-items:center; gap:12px; color: var(--text-faint); font-family: var(--mono); font-size: 10px; letter-spacing:.1em; margin: 4px 0; }
-  .divider::before, .divider::after { content:""; flex:1; height:1px; background: var(--line-soft); }
-  .demo-link {
-    margin-top: 20px; font-size: 12.5px; color: var(--text-dim);
-  }
-  .demo-link a { color: var(--amber); text-decoration: none; font-weight: 600; cursor: pointer; }
-  .demo-link a:hover { text-decoration: underline; }
-  .sent-state { display:none; flex-direction: column; gap: 16px; align-items:center; }
-  .sent-state.show { display:flex; animation: fadeIn .3s ease; }
-  .check-ring {
-    width: 64px; height: 64px; border-radius: 50%; display:grid; place-items:center;
-    background: rgba(94,201,138,.12); border: 2px solid var(--green); color: var(--green);
-  }
-  .check-ring svg { width: 30px; height: 30px; }
-  .error-msg { font-size: 13px; color: var(--red); text-align: left; display: none; }
-  .error-msg.show { display: block; animation: fadeIn 0.2s ease; }
-  .shake { animation: shake 0.4s ease; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
 
-  /* ── Connection wizard ─────────────────── */
-  .wiz-list { display:flex; flex-direction:column; gap:12px; margin: 4px 0 22px; }
-  .wiz-row {
-    display:flex; align-items:center; gap:14px; padding: 14px;
-    border:1px solid var(--line-soft); border-radius: 12px; background: var(--panel-2);
+  .login-input {
+    width: 100%;
+    height: 48px;
+    background: var(--panel-2);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 0 16px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .wiz-ico { width:38px; height:38px; border-radius:10px; display:grid; place-items:center; font-family: var(--mono); font-weight:700; font-size:13px; flex:none; }
-  .wiz-meta { flex:1; min-width:0; }
-  .wiz-meta .n { font-size:14px; font-weight:600; }
-  .wiz-meta .s { font-size:12px; color: var(--text-dim); margin-top:2px; }
-  .wiz-meta .sample { font-size:11.5px; color: var(--green); margin-top:6px; font-family: var(--mono); display:none; }
-  .wiz-meta .sample.show { display:block; animation: fadeIn .3s ease; }
+
+  .login-input:focus {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(232, 176, 75, 0.12);
+  }
+
+  .btn {
+    height: 48px;
+    background: var(--amber);
+    color: var(--ink);
+    border: none;
+    border-radius: 10px;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    display: grid;
+    place-items: center;
+  }
+
+  .btn:hover {
+    opacity: 0.9;
+  }
+
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn.ghost {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1.5px solid var(--line);
+  }
+
+  .btn.ghost:hover {
+    border-color: var(--text-dim);
+    opacity: 1;
+  }
+
+  .btn.google {
+    background: #fff;
+    color: #1a1a1a;
+    gap: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-faint);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    margin: 4px 0;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line-soft);
+  }
+
+  .demo-link {
+    margin-top: 20px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+
+  .demo-link a {
+    color: var(--amber);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .demo-link a:hover {
+    text-decoration: underline;
+  }
+
+  .sent-state {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .sent-state.show {
+    display: flex;
+    animation: fadeIn .3s ease;
+  }
+
+  .check-ring {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: rgba(94, 201, 138, .12);
+    border: 2px solid var(--green);
+    color: var(--green);
+  }
+
+  .check-ring svg {
+    width: 30px;
+    height: 30px;
+  }
+
+  .error-msg {
+    font-size: 13px;
+    color: var(--red);
+    text-align: left;
+    display: none;
+  }
+
+  .error-msg.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .shake {
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes shake {
+
+    0%,
+    100% {
+      transform: translateX(0)
+    }
+
+    20%,
+    60% {
+      transform: translateX(-6px)
+    }
+
+    40%,
+    80% {
+      transform: translateX(6px)
+    }
+  }
+
+  /* ── Settings page (integrations + API keys) ────── */
+  .page {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    overflow-y: auto;
+    background: var(--ink);
+    background-image:
+      radial-gradient(1200px 500px at 80% -10%, rgba(232, 176, 75, 0.06), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(106, 166, 255, 0.05), transparent 55%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .3s ease;
+  }
+
+  .page.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .page-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 30px clamp(16px, 3vw, 34px) 60px;
+  }
+
+  .page-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+
+  .page-head h1 {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+
+  .page-head .back {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .page-head .back:hover {
+    color: var(--amber);
+    border-color: var(--amber);
+  }
+
+  .page-head .back svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .page-sub {
+    color: var(--text-dim);
+    font-size: 13.5px;
+    margin-bottom: 26px;
+    line-height: 1.45;
+  }
+
+  .keynote {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: var(--text-dim);
+    background: rgba(106, 166, 255, .06);
+    border: 1px solid rgba(106, 166, 255, .18);
+    border-radius: 10px;
+    padding: 11px 14px;
+    margin-bottom: 22px;
+    line-height: 1.45;
+  }
+
+  .keynote b {
+    color: var(--blue);
+  }
+
+  .set-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .set-row {
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
+    background: var(--panel);
+    overflow: hidden;
+  }
+
+  .set-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+  }
+
+  .wiz-ico {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 13px;
+    flex: none;
+    color: var(--ink);
+  }
+
+  .set-head .meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .set-head .meta .n {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .set-head .meta .s {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
   .wiz-test {
-    font-family: var(--mono); font-size: 11px; background: var(--panel); color: var(--text-dim);
-    border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; cursor: pointer; white-space:nowrap;
-    transition: all .15s; min-width: 96px; text-align:center;
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--panel-2);
+    color: var(--text-dim);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s;
+    min-width: 110px;
+    text-align: center;
   }
-  .wiz-test:hover { border-color: var(--amber); color: var(--amber); }
-  .wiz-test.ok { color: var(--green); border-color: rgba(94,201,138,.4); background: rgba(94,201,138,.08); cursor:default; }
-  .wiz-test.testing { color: var(--text-faint); }
-  .wiz-actions { display:flex; gap:10px; }
-  .wiz-actions .btn { flex:1; }
+
+  .wiz-test:hover {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  .wiz-test.ok {
+    color: var(--green);
+    border-color: rgba(94, 201, 138, .4);
+    background: rgba(94, 201, 138, .08);
+  }
+
+  .wiz-test.testing {
+    color: var(--text-faint);
+  }
+
+  .set-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 18px 16px;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 16px;
+  }
+
+  .set-fields .field.full {
+    grid-column: 1 / -1;
+  }
+
+  .set-fields label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+
+  .set-fields input {
+    width: 100%;
+    height: 42px;
+    background: var(--panel-2);
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    padding: 0 14px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  .set-fields input:focus {
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(232, 176, 75, .1);
+  }
+
+  .set-fields .sample {
+    grid-column: 1 / -1;
+    font-size: 12px;
+    color: var(--green);
+    font-family: var(--mono);
+    display: none;
+  }
+
+  .set-fields .sample.show {
+    display: block;
+    animation: fadeIn .3s ease;
+  }
+
+  .set-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .set-actions .btn {
+    flex: 1;
+  }
+
+  @media (max-width: 620px) {
+    .set-fields {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 
 <div class="wrap" id="app">
   <header>
     <div class="brand">
-      <h1>Command Center<span class="dot">.</span></h1>
+      <h1>Tide<span class="dot">.</span></h1>
       <div class="sub">Jira × Figma × ClickUp × Slack · Personal Ops Board</div>
     </div>
     <div class="status">
@@ -387,21 +1366,38 @@
       <div class="sync"><span class="pulse"></span><span id="synced">synced just now</span></div>
       <div class="clock" id="clock">--:--</div>
       <button class="iconbtn" id="connections" title="Connections" aria-label="Connections">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10.59 13.41a2 2 0 0 1 0-2.82l3-3a2 2 0 0 1 2.82 0l1 1"/><path d="M13.41 10.59a2 2 0 0 1 0 2.82l-3 3a2 2 0 0 1-2.82 0l-1-1"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M10.59 13.41a2 2 0 0 1 0-2.82l3-3a2 2 0 0 1 2.82 0l1 1" />
+          <path d="M13.41 10.59a2 2 0 0 1 0 2.82l-3 3a2 2 0 0 1-2.82 0l-1-1" />
         </svg>
       </button>
       <button class="iconbtn" id="refresh" title="Refresh now" aria-label="Refresh">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+          <path d="M21 3v6h-6" />
         </svg>
       </button>
     </div>
   </header>
 
+  <nav class="tabs" id="tabs">
+    <button data-src="all" class="active"><span class="dot-src" style="background:var(--amber)"></span>All Boards <span
+        class="badge" id="tab-all">0</span></button>
+    <button data-src="jira"><span class="dot-src" style="background:var(--blue)"></span>Jira <span class="badge"
+        id="tab-jira">0</span></button>
+    <button data-src="figma"><span class="dot-src" style="background:var(--violet)"></span>Figma <span class="badge"
+        id="tab-figma">0</span></button>
+    <button data-src="clickup"><span class="dot-src" style="background:var(--pink)"></span>ClickUp <span class="badge"
+        id="tab-clickup">0</span></button>
+    <button data-src="slack"><span class="dot-src" style="background:var(--sky)"></span>Slack <span class="badge"
+        id="tab-slack">0</span></button>
+  </nav>
+
   <div class="demobar" id="demobar">
     <span>🎬 You're exploring <b>demo mode</b> — synthetic data across all four tools, nothing connected.</span>
-    <button id="connect-real">Connect your tools</button>
+    <button id="connect-real">Open Settings</button>
   </div>
 
   <section class="metrics" id="metrics"></section>
@@ -410,7 +1406,9 @@
     <div class="col">
       <section class="panel" style="animation-delay:.05s">
         <div class="head">
-          <div class="t"><h2 id="feed-title">⚑ Attention Required</h2></div>
+          <div class="t">
+            <h2 id="feed-title">⚑ Attention Required</h2>
+          </div>
           <div class="count" id="attn-count">0</div>
         </div>
         <div class="feed" id="attention"></div>
@@ -419,13 +1417,19 @@
 
     <div class="col">
       <section class="panel" style="animation-delay:.1s">
-        <div class="head"><div class="t"><h2>Active Sprint</h2></div></div>
+        <div class="head">
+          <div class="t">
+            <h2>Active Sprint</h2>
+          </div>
+        </div>
         <div class="sprint-body" id="sprint"></div>
       </section>
 
       <section class="panel" style="animation-delay:.15s">
         <div class="head">
-          <div class="t"><span class="tag-src src-jira">Jira</span><h2>Recent Activity</h2></div>
+          <div class="t"><span class="tag-src src-jira">Jira</span>
+            <h2>Recent Activity</h2>
+          </div>
           <div class="count" id="jira-count">0</div>
         </div>
         <div id="jira-feed"></div>
@@ -433,7 +1437,9 @@
 
       <section class="panel" style="animation-delay:.2s">
         <div class="head">
-          <div class="t"><span class="tag-src src-figma">Figma</span><h2>Design Updates</h2></div>
+          <div class="t"><span class="tag-src src-figma">Figma</span>
+            <h2>Design Updates</h2>
+          </div>
           <div class="count" id="figma-count">0</div>
         </div>
         <div id="figma-feed"></div>
@@ -441,18 +1447,27 @@
     </div>
   </div>
 
-  <div class="foot">DATA SOURCE: <b id="srcmode">DEMO</b> · <span id="footnote">synthetic sandbox — connect tools to go live</span></div>
+  <div class="foot">DATA SOURCE: <b id="srcmode">DEMO</b> · <span id="footnote">synthetic sandbox — connect tools to go
+      live</span></div>
 </div>
 
 <!-- ── Passwordless login ────────────────── -->
 <div class="overlay" id="login-overlay">
   <div class="card" id="login-card">
-    <h2>Command Center<span class="dot">.</span></h2>
+    <h2>Tide<span class="dot">.</span></h2>
     <div class="desc">Sign in to your workspace. No passwords — we'll send a magic link.</div>
 
     <form class="login-form" id="login-form">
       <button type="button" class="btn google" id="google-btn">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+        <svg width="18" height="18" viewBox="0 0 18 18">
+          <path fill="#4285F4"
+            d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z" />
+          <path fill="#34A853"
+            d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z" />
+          <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33z" />
+          <path fill="#EA4335"
+            d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z" />
+        </svg>
         Continue with Google
       </button>
       <div class="divider">OR</div>
@@ -466,9 +1481,13 @@
 
     <div class="sent-state" id="sent-state">
       <div class="check-ring">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
       </div>
-      <div class="desc" style="margin:0; text-align:center;">Magic link sent to <b id="sent-email" style="color:var(--text)"></b>.<br>Check your inbox to continue.</div>
+      <div class="desc" style="margin:0; text-align:center;">Magic link sent to <b id="sent-email"
+          style="color:var(--text)"></b>.<br>Check your inbox to continue.</div>
       <button type="button" class="btn" id="open-link" style="width:100%">Open the link →</button>
     </div>
 
@@ -476,189 +1495,219 @@
   </div>
 </div>
 
-<!-- ── Connection wizard ─────────────────── -->
-<div class="overlay" id="wizard-overlay">
-  <div class="card wide" id="wizard-card">
-    <h2>Connect your tools</h2>
-    <div class="desc">Test each integration to confirm it's pulling. A green check means you're live.</div>
-    <div class="wiz-list" id="wiz-list"></div>
-    <div class="wiz-actions">
-      <button class="btn ghost" id="wiz-skip" style="flex:.6">Use demo data</button>
-      <button class="btn" id="wiz-done">Go to board</button>
+<!-- ── Settings page (integrations + API keys) ─────── -->
+<div class="page" id="settings-page">
+  <div class="page-inner">
+    <div class="page-head">
+      <button class="back" id="settings-back" title="Back to board" aria-label="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M19 12H5" />
+          <path d="m12 19-7-7 7-7" />
+        </svg>
+      </button>
+      <h1>Settings</h1>
+    </div>
+    <div class="page-sub">Paste each tool's API key, then <b>Test connection</b> to confirm it's pulling — a green check
+      means you're live.</div>
+    <div class="keynote">
+      <span>🔒</span>
+      <span>Keys you paste here are saved <b>only in this browser</b> (localStorage) for the connection flow. For a
+        deployed setup, the real secrets live in the Cloudflare Worker — never shipped to the browser.</span>
+    </div>
+    <div class="set-list" id="set-list"></div>
+    <div class="set-actions">
+      <button class="btn ghost" id="set-demo" style="flex:.6">Use demo data</button>
+      <button class="btn" id="set-save">Save &amp; go to board</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ============================================================
-   CONFIG  —  edit when you point at a real proxy
-   ------------------------------------------------------------
-   The browser cannot call Jira/Figma/ClickUp/Slack directly (CORS).
-   proxyUrl points at the Cloudflare Worker that holds your tokens.
-   Auth here is a free, client-side passwordless flow (magic-link UX
-   + Google button) suitable for a personal/portfolio deployment.
-   To make it "real" later: have the Worker mint a signed session on
-   /auth/verify and store it in KV — the UI states already match.
-   ============================================================ */
-const CONFIG = {
-  proxyUrl: 'http://localhost:8787',
-  refreshMs: 60000,
-};
-
-/* ---------- local persistence (no secrets stored here) ---------- */
-const LS = {
-  session:  'pm_session',       // signed-in email (or "demo")
-  mode:     'pm_mode',          // 'demo' | 'live'
-  conns:    'pm_connections',   // which integrations the user marked connected
-  links:    'pm_links',         // cross-tool attachments keyed by card key
-};
-const store = {
-  get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
-  set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
-  del: (k) => localStorage.removeItem(k),
-};
-
-let STATE = {
-  mode: store.get(LS.mode, null),
-  session: store.get(LS.session, null),
-  view: 'all',
-  links: store.get(LS.links, {}),    // { 'PAY-412': [{src,label,url}], ... }
-  data: null,
-};
-
-/* ============================================================
-   SLA / STALENESS  (reused from the Global Comms triage logic)
-   A card breaches when overdue, or when it has gone untouched
-   past a priority-scaled threshold. "Warn" is the early signal.
-   ============================================================ */
-function slaFlag(item) {
-  const now = Date.now();
-  if (item.dueISO) {
-    const due = new Date(item.dueISO).getTime();
-    if (due < now) return { level: 'breach', label: 'overdue' };
-    if (due - now < 24 * 36e5) return { level: 'warn', label: 'due today' };
-  }
-  if (item.updatedISO) {
-    const ageH = (now - new Date(item.updatedISO).getTime()) / 36e5;
-    const thresh = item.pri === 'p0' ? 4 : item.pri === 'p1' ? 24 : 72; // hours
-    if (ageH > thresh * 2) return { level: 'breach', label: `stale ${fmtAge(ageH)}` };
-    if (ageH > thresh)     return { level: 'warn',   label: `stale ${fmtAge(ageH)}` };
-  }
-  return null;
-}
-function fmtAge(h) { return h < 48 ? Math.round(h) + 'h' : Math.round(h / 24) + 'd'; }
-
-/* Is this item something that needs me TODAY? */
-function isToday(item) {
-  const now = new Date();
-  if (item.pri === 'p0') return true;
-  if (item.dueISO) {
-    const d = new Date(item.dueISO);
-    if (d <= now) return true;                                    // overdue
-    if (d.toDateString() === now.toDateString()) return true;     // due today
-  }
-  return !!slaFlag(item);                                         // breaching SLA
-}
-
-/* Urgency score for sorting (lower = more urgent). */
-function urgency(item) {
-  const sla = slaFlag(item);
-  const slaW = sla ? (sla.level === 'breach' ? 0 : 1) : 2;
-  const priW = item.pri === 'p0' ? 0 : item.pri === 'p1' ? 1 : 2;
-  return priW * 3 + slaW;
-}
-
-/* ============================================================
-   DATA  —  demo (synthetic) or live (via proxy)
-   ============================================================ */
-async function getData() {
-  if (STATE.mode === 'live') {
-    const r = await fetch(CONFIG.proxyUrl, { headers: { 'Accept': 'application/json' } });
-    if (!r.ok) throw new Error('Proxy error: ' + r.status);
-    const data = await r.json();
-    if (data._errors && data._errors.length) console.warn('Proxy source errors:', data._errors);
-    return data;
-  }
-  return buildMock();
-}
-
-/* ---------- synthetic sandbox (timestamps relative to now) ---------- */
-function iso(hoursAgo) { return new Date(Date.now() - hoursAgo * 36e5).toISOString(); }
-function isoIn(hours)  { return new Date(Date.now() + hours * 36e5).toISOString(); }
-
-function buildMock() {
-  return {
-    metrics: [
-      { label: 'Sprint Day', val: '6', sub: '/ 10', meta: '4 days remaining', accent: 'var(--amber)' },
-      { label: 'On Track',   val: '78', sub: '%',   meta: '14 of 18 points done', accent: 'var(--green)' },
-      { label: 'Needs Me',   val: '4',  sub: '',    meta: 'across all tools today', accent: 'var(--red)' },
-      { label: 'My WIP',     val: '5',  sub: '',    meta: '2 over your limit', accent: 'var(--blue)' },
-      { label: 'SLA Risk',   val: '3',  sub: '',    meta: '1 breached, 2 at risk', accent: 'var(--violet)' },
-    ],
-    attention: [
-      { src:'jira',  pri:'p0', key:'PAY-412', title:'Checkout API returns 500 on retry', desc:'Issue · Blocked · needs your call on rollback vs hotfix', chip:'blocked', updatedISO: iso(6), dueISO: iso(2) },
-      { src:'slack', pri:'p0', key:'#payments', title:'Dana: "can you confirm the rollback plan before standup?"', desc:'Dana A. mentioned you', chip:'reply', updatedISO: iso(0.4), dueISO: null },
-      { src:'figma', pri:'p0', key:'Checkout v3', title:'@you Priya left 4 comments on the new flow', desc:'"Confirm spacing on the error state before dev handoff?"', chip:'mention', updatedISO: iso(0.6), dueISO: null },
-      { src:'clickup', pri:'p1', key:'Launch', title:'Finalize Q3 launch checklist', desc:'in progress · due today', chip:'due', updatedISO: iso(26), dueISO: isoIn(5) },
-      { src:'jira',  pri:'p1', key:'PAY-398', title:'Approve scope change for refunds epic', desc:'Story · In Review · eng requesting 3 extra points', chip:'review', updatedISO: iso(1), dueISO: null },
-      { src:'figma', pri:'p1', key:'Onboarding', title:'Design ready for spec review', desc:'Marcus marked onboarding screens ready for handoff', chip:'review', updatedISO: iso(2), dueISO: null },
-      { src:'clickup', pri:'p1', key:'Marketing', title:'Review blog draft for payments launch', desc:'open · due tomorrow', chip:'due', updatedISO: iso(30), dueISO: isoIn(28) },
-      { src:'slack', pri:'p1', key:'#design-eng', title:'Marcus: "thread on the error-state tokens needs your reply"', desc:'Marcus C. mentioned you', chip:'reply', updatedISO: iso(3), dueISO: null },
-      { src:'jira',  pri:'p2', key:'PAY-377', title:'QA flagged edge case in currency rounding', desc:'Bug · To Do · tagged you to triage', chip:null, updatedISO: iso(120), dueISO: null },
-    ],
-    sprint: { name: 'Payments — Sprint 24', daysLeft: 4, done: 56, prog: 22, rev: 11, pointsDone: 14, pointsTotal: 18 },
-    jira: [
-      { who:'AB', color:'var(--blue)',  bold:'Aisha B.', txt:'transitioned PAY-410 to <b>In Review</b>', t:'18m' },
-      { who:'TK', color:'var(--green)', bold:'Tom K.',   txt:'closed PAY-389 — <span class="m">Retry logic shipped</span>', t:'42m' },
-      { who:'DA', color:'var(--amber)', bold:'Dana A.',  txt:'commented on PAY-401', t:'1h' },
-      { who:'JM', color:'var(--red)',   bold:'Jo M.',    txt:'flagged PAY-412 as <b>Blocked</b>', t:'1h' },
-    ],
-    figma: [
-      { who:'PR', color:'var(--violet)', bold:'Priya R.',  txt:'published <b>Checkout v3</b> — 12 frames updated', t:'34m' },
-      { who:'MC', color:'var(--cyan)',   bold:'Marcus C.', txt:'marked <span class="m">Onboarding</span> ready for handoff', t:'2h' },
-      { who:'PR', color:'var(--violet)', bold:'Priya R.',  txt:'resolved 3 comments on Error States', t:'4h' },
-    ],
-    _connected: { jira: true, figma: true, clickup: true, slack: true },
+  /* ============================================================
+     CONFIG  —  edit when you point at a real proxy
+     ------------------------------------------------------------
+     The browser cannot call Jira/Figma/ClickUp/Slack directly (CORS).
+     proxyUrl points at the Cloudflare Worker that holds your tokens.
+     Auth here is a free, client-side passwordless flow (magic-link UX
+     + Google button) suitable for a personal/portfolio deployment.
+     To make it "real" later: have the Worker mint a signed session on
+     /auth/verify and store it in KV — the UI states already match.
+     ============================================================ */
+  const CONFIG = {
+    proxyUrl: 'http://localhost:8787',
+    refreshMs: 60000,
   };
-}
 
-/* ============================================================
-   RENDER
-   ============================================================ */
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
+  /* ---------- local persistence (no secrets stored here) ---------- */
+  const LS = {
+    session: 'tide_session',       // signed-in email (or "demo")
+    mode: 'tide_mode',             // 'demo' | 'live'
+    conns: 'tide_connections',     // which integrations the user marked connected
+    links: 'tide_links',           // cross-tool attachments keyed by card key
+    keys: 'tide_keys',             // API keys pasted in Settings (this browser only)
+  };
+  const store = {
+    get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+    set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+    del: (k) => localStorage.removeItem(k),
+  };
 
-function renderMetrics(m){
-  $('#metrics').innerHTML = m.map(x => `
+  let STATE = {
+    mode: store.get(LS.mode, null),
+    session: store.get(LS.session, null),
+    view: 'all',                       // 'all' | 'myday'
+    src: 'all',                        // 'all' | 'jira' | 'figma' | 'clickup' | 'slack'
+    links: store.get(LS.links, {}),    // { 'PAY-412': [{src,label,url}], ... }
+    keys: store.get(LS.keys, {}),      // { JIRA_SITE: '…', FIGMA_TOKEN: '…', … }
+    data: null,
+  };
+
+  /* ============================================================
+     SLA / STALENESS  (reused from the Global Comms triage logic)
+     A card breaches when overdue, or when it has gone untouched
+     past a priority-scaled threshold. "Warn" is the early signal.
+     ============================================================ */
+  function slaFlag(item) {
+    const now = Date.now();
+    if (item.dueISO) {
+      const due = new Date(item.dueISO).getTime();
+      if (due < now) return { level: 'breach', label: 'overdue' };
+      if (due - now < 24 * 36e5) return { level: 'warn', label: 'due today' };
+    }
+    if (item.updatedISO) {
+      const ageH = (now - new Date(item.updatedISO).getTime()) / 36e5;
+      const thresh = item.pri === 'p0' ? 4 : item.pri === 'p1' ? 24 : 72; // hours
+      if (ageH > thresh * 2) return { level: 'breach', label: `stale ${fmtAge(ageH)}` };
+      if (ageH > thresh) return { level: 'warn', label: `stale ${fmtAge(ageH)}` };
+    }
+    return null;
+  }
+  function fmtAge(h) { return h < 48 ? Math.round(h) + 'h' : Math.round(h / 24) + 'd'; }
+
+  /* Is this item something that needs me TODAY? */
+  function isToday(item) {
+    const now = new Date();
+    if (item.pri === 'p0') return true;
+    if (item.dueISO) {
+      const d = new Date(item.dueISO);
+      if (d <= now) return true;                                    // overdue
+      if (d.toDateString() === now.toDateString()) return true;     // due today
+    }
+    return !!slaFlag(item);                                         // breaching SLA
+  }
+
+  /* Urgency score for sorting (lower = more urgent). */
+  function urgency(item) {
+    const sla = slaFlag(item);
+    const slaW = sla ? (sla.level === 'breach' ? 0 : 1) : 2;
+    const priW = item.pri === 'p0' ? 0 : item.pri === 'p1' ? 1 : 2;
+    return priW * 3 + slaW;
+  }
+
+  /* ============================================================
+     DATA  —  demo (synthetic) or live (via proxy)
+     ============================================================ */
+  async function getData() {
+    if (STATE.mode === 'live') {
+      const r = await fetch(CONFIG.proxyUrl, { headers: { 'Accept': 'application/json' } });
+      if (!r.ok) throw new Error('Proxy error: ' + r.status);
+      const data = await r.json();
+      if (data._errors && data._errors.length) console.warn('Proxy source errors:', data._errors);
+      return data;
+    }
+    return buildMock();
+  }
+
+  /* ---------- synthetic sandbox (timestamps relative to now) ---------- */
+  function iso(hoursAgo) { return new Date(Date.now() - hoursAgo * 36e5).toISOString(); }
+  function isoIn(hours) { return new Date(Date.now() + hours * 36e5).toISOString(); }
+
+  function buildMock() {
+    return {
+      metrics: [
+        { label: 'Sprint Day', val: '6', sub: '/ 10', meta: '4 days remaining', accent: 'var(--amber)' },
+        { label: 'On Track', val: '78', sub: '%', meta: '14 of 18 points done', accent: 'var(--green)' },
+        { label: 'Needs Me', val: '4', sub: '', meta: 'across all tools today', accent: 'var(--red)' },
+        { label: 'My WIP', val: '5', sub: '', meta: '2 over your limit', accent: 'var(--blue)' },
+        { label: 'SLA Risk', val: '3', sub: '', meta: '1 breached, 2 at risk', accent: 'var(--violet)' },
+      ],
+      attention: [
+        { src: 'jira', pri: 'p0', key: 'PAY-412', title: 'Checkout API returns 500 on retry', desc: 'Issue · Blocked · needs your call on rollback vs hotfix', chip: 'blocked', updatedISO: iso(6), dueISO: iso(2) },
+        { src: 'slack', pri: 'p0', key: '#payments', title: 'Dana: "can you confirm the rollback plan before standup?"', desc: 'Dana A. mentioned you', chip: 'reply', updatedISO: iso(0.4), dueISO: null },
+        { src: 'figma', pri: 'p0', key: 'Checkout v3', title: '@you Priya left 4 comments on the new flow', desc: '"Confirm spacing on the error state before dev handoff?"', chip: 'mention', updatedISO: iso(0.6), dueISO: null },
+        { src: 'clickup', pri: 'p1', key: 'Launch', title: 'Finalize Q3 launch checklist', desc: 'in progress · due today', chip: 'due', updatedISO: iso(26), dueISO: isoIn(5) },
+        { src: 'jira', pri: 'p1', key: 'PAY-398', title: 'Approve scope change for refunds epic', desc: 'Story · In Review · eng requesting 3 extra points', chip: 'review', updatedISO: iso(1), dueISO: null },
+        { src: 'figma', pri: 'p1', key: 'Onboarding', title: 'Design ready for spec review', desc: 'Marcus marked onboarding screens ready for handoff', chip: 'review', updatedISO: iso(2), dueISO: null },
+        { src: 'clickup', pri: 'p1', key: 'Marketing', title: 'Review blog draft for payments launch', desc: 'open · due tomorrow', chip: 'due', updatedISO: iso(30), dueISO: isoIn(28) },
+        { src: 'slack', pri: 'p1', key: '#design-eng', title: 'Marcus: "thread on the error-state tokens needs your reply"', desc: 'Marcus C. mentioned you', chip: 'reply', updatedISO: iso(3), dueISO: null },
+        { src: 'jira', pri: 'p2', key: 'PAY-377', title: 'QA flagged edge case in currency rounding', desc: 'Bug · To Do · tagged you to triage', chip: null, updatedISO: iso(120), dueISO: null },
+      ],
+      sprint: { name: 'Payments — Sprint 24', daysLeft: 4, done: 56, prog: 22, rev: 11, pointsDone: 14, pointsTotal: 18 },
+      jira: [
+        { who: 'AB', color: 'var(--blue)', bold: 'Aisha B.', txt: 'transitioned PAY-410 to <b>In Review</b>', t: '18m' },
+        { who: 'TK', color: 'var(--green)', bold: 'Tom K.', txt: 'closed PAY-389 — <span class="m">Retry logic shipped</span>', t: '42m' },
+        { who: 'DA', color: 'var(--amber)', bold: 'Dana A.', txt: 'commented on PAY-401', t: '1h' },
+        { who: 'JM', color: 'var(--red)', bold: 'Jo M.', txt: 'flagged PAY-412 as <b>Blocked</b>', t: '1h' },
+      ],
+      figma: [
+        { who: 'PR', color: 'var(--violet)', bold: 'Priya R.', txt: 'published <b>Checkout v3</b> — 12 frames updated', t: '34m' },
+        { who: 'MC', color: 'var(--cyan)', bold: 'Marcus C.', txt: 'marked <span class="m">Onboarding</span> ready for handoff', t: '2h' },
+        { who: 'PR', color: 'var(--violet)', bold: 'Priya R.', txt: 'resolved 3 comments on Error States', t: '4h' },
+      ],
+      _connected: { jira: true, figma: true, clickup: true, slack: true },
+    };
+  }
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+
+  function renderMetrics(m) {
+    $('#metrics').innerHTML = m.map(x => `
     <div class="metric" style="--accent:${x.accent}">
       <div class="label">${x.label}</div>
       <div class="val">${x.val}<small>${x.sub}</small></div>
       <div class="meta">${x.meta}</div>
     </div>`).join('');
-}
-
-function linkIcon() {
-  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
-}
-
-function renderAttention(items){
-  // Apply the active view filter (All vs My Day) + urgency sort.
-  let list = items.slice();
-  if (STATE.view === 'myday') list = list.filter(isToday);
-  list.sort((a, b) => urgency(a) - urgency(b));
-
-  $('#feed-title').textContent = STATE.view === 'myday' ? '☀ My Day' : '⚑ Attention Required';
-  $('#attn-count').textContent = list.length;
-
-  if (!list.length) {
-    $('#attention').innerHTML = `<div class="empty">Nothing needs you ${STATE.view === 'myday' ? 'today' : 'right now'}. 🎉</div>`;
-    return;
   }
 
-  $('#attention').innerHTML = list.map((it, i) => {
-    const sla = slaFlag(it);
-    const links = STATE.links[it.key] || [];
-    return `
+  function linkIcon() {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+  }
+
+  function renderTabCounts(items) {
+    $('#tab-all').textContent = items.length;
+    ['jira', 'figma', 'clickup', 'slack'].forEach(s => {
+      $('#tab-' + s).textContent = items.filter(i => i.src === s).length;
+    });
+  }
+
+  function renderAttention(items) {
+    renderTabCounts(items);
+
+    // Apply source tab → view (All/My Day) → urgency sort.
+    let list = items.slice();
+    if (STATE.src !== 'all') list = list.filter(i => i.src === STATE.src);
+    if (STATE.view === 'myday') list = list.filter(isToday);
+    list.sort((a, b) => urgency(a) - urgency(b));
+
+    const srcName = { jira: 'Jira', figma: 'Figma', clickup: 'ClickUp', slack: 'Slack' };
+    const base = STATE.view === 'myday' ? '☀ My Day' : '⚑ Attention Required';
+    $('#feed-title').textContent = STATE.src === 'all' ? base : `${base} · ${srcName[STATE.src]}`;
+    $('#attn-count').textContent = list.length;
+
+    if (!list.length) {
+      $('#attention').innerHTML = `<div class="empty">Nothing needs you ${STATE.view === 'myday' ? 'today' : 'right now'}. 🎉</div>`;
+      return;
+    }
+
+    $('#attention').innerHTML = list.map((it, i) => {
+      const sla = slaFlag(it);
+      const links = STATE.links[it.key] || [];
+      return `
     <div class="item" data-key="${it.key}" data-idx="${i}">
       <span class="pri ${it.pri}"></span>
       <div class="body">
@@ -675,26 +1724,26 @@ function renderAttention(items){
       <div class="when">${ago(it.updatedISO)}</div>
       <div class="context" id="ctx-${i}"></div>
     </div>`;
-  }).join('');
+    }).join('');
 
-  // Wire expand/collapse for cross-tool context.
-  $$('#attention .item').forEach(el => {
-    el.addEventListener('click', (e) => {
-      if (e.target.closest('.ctx-link') || e.target.closest('.ctx-add')) return;
-      const idx = el.dataset.idx, key = el.dataset.key;
-      const ctx = $('#ctx-' + idx);
-      const open = ctx.classList.contains('open');
-      $$('#attention .context.open').forEach(c => c.classList.remove('open'));
-      if (!open) { renderContext(ctx, key); ctx.classList.add('open'); }
+    // Wire expand/collapse for cross-tool context.
+    $$('#attention .item').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if (e.target.closest('.ctx-link') || e.target.closest('.ctx-add')) return;
+        const idx = el.dataset.idx, key = el.dataset.key;
+        const ctx = $('#ctx-' + idx);
+        const open = ctx.classList.contains('open');
+        $$('#attention .context.open').forEach(c => c.classList.remove('open'));
+        if (!open) { renderContext(ctx, key); ctx.classList.add('open'); }
+      });
     });
-  });
-}
+  }
 
-/* The differentiator: one card shows linked context from other tools. */
-function renderContext(ctx, key){
-  const links = STATE.links[key] || [];
-  const srcLabel = { jira:'Jira', figma:'Figma', clickup:'ClickUp', slack:'Slack' };
-  ctx.innerHTML = `
+  /* The differentiator: one card shows linked context from other tools. */
+  function renderContext(ctx, key) {
+    const links = STATE.links[key] || [];
+    const srcLabel = { jira: 'Jira', figma: 'Figma', clickup: 'ClickUp', slack: 'Slack' };
+    ctx.innerHTML = `
     <div class="ctx-title">Linked context</div>
     ${links.length ? links.map((l, li) => `
       <a class="ctx-link" href="${l.url || '#'}" target="_blank" rel="noopener">
@@ -709,40 +1758,40 @@ function renderContext(ctx, key){
       <button data-key="${key}" data-src="jira">+ Jira issue</button>
     </div>`;
 
-  ctx.querySelectorAll('.ctx-add button').forEach(b => {
-    b.addEventListener('click', () => addLink(b.dataset.key, b.dataset.src, ctx));
-  });
-  ctx.querySelectorAll('.ctx-link .x').forEach(x => {
-    x.addEventListener('click', () => removeLink(x.dataset.key, +x.dataset.li, ctx));
-  });
-}
+    ctx.querySelectorAll('.ctx-add button').forEach(b => {
+      b.addEventListener('click', () => addLink(b.dataset.key, b.dataset.src, ctx));
+    });
+    ctx.querySelectorAll('.ctx-link .x').forEach(x => {
+      x.addEventListener('click', () => removeLink(x.dataset.key, +x.dataset.li, ctx));
+    });
+  }
 
-function addLink(key, src, ctx){
-  const prompts = {
-    figma: 'Figma file name or URL', slack: 'Slack thread (channel / topic)',
-    clickup: 'ClickUp task name', jira: 'Jira issue key or summary',
-  };
-  const label = prompt(`Attach a ${src} item to ${key}:`, '');
-  if (!label) return;
-  const url = /^https?:\/\//.test(label) ? label : '';
-  STATE.links[key] = STATE.links[key] || [];
-  STATE.links[key].push({ src, label: url ? label.replace(/^https?:\/\//, '').slice(0, 40) : label, url });
-  store.set(LS.links, STATE.links);
-  renderContext(ctx, key);
-  renderAttention(STATE.data.attention); // refresh badge counts
-  $('#ctx-' + [...$$('#attention .item')].find(el => el.dataset.key === key)?.dataset.idx)?.classList.add('open');
-}
+  function addLink(key, src, ctx) {
+    const prompts = {
+      figma: 'Figma file name or URL', slack: 'Slack thread (channel / topic)',
+      clickup: 'ClickUp task name', jira: 'Jira issue key or summary',
+    };
+    const label = prompt(`Attach a ${src} item to ${key}:`, '');
+    if (!label) return;
+    const url = /^https?:\/\//.test(label) ? label : '';
+    STATE.links[key] = STATE.links[key] || [];
+    STATE.links[key].push({ src, label: url ? label.replace(/^https?:\/\//, '').slice(0, 40) : label, url });
+    store.set(LS.links, STATE.links);
+    renderContext(ctx, key);
+    renderAttention(STATE.data.attention); // refresh badge counts
+    $('#ctx-' + [...$$('#attention .item')].find(el => el.dataset.key === key)?.dataset.idx)?.classList.add('open');
+  }
 
-function removeLink(key, li, ctx){
-  (STATE.links[key] || []).splice(li, 1);
-  if (!STATE.links[key].length) delete STATE.links[key];
-  store.set(LS.links, STATE.links);
-  renderContext(ctx, key);
-  renderAttention(STATE.data.attention);
-}
+  function removeLink(key, li, ctx) {
+    (STATE.links[key] || []).splice(li, 1);
+    if (!STATE.links[key].length) delete STATE.links[key];
+    store.set(LS.links, STATE.links);
+    renderContext(ctx, key);
+    renderAttention(STATE.data.attention);
+  }
 
-function renderSprint(s){
-  $('#sprint').innerHTML = `
+  function renderSprint(s) {
+    $('#sprint').innerHTML = `
     <div class="sprint-top">
       <span class="name">${s.name}</span>
       <span class="days">${s.daysLeft}d left</span>
@@ -758,12 +1807,12 @@ function renderSprint(s){
       <span><i style="background:var(--amber)"></i>Review</span>
       <span style="margin-left:auto;color:var(--text-faint)">${s.pointsDone}/${s.pointsTotal} pts</span>
     </div>`;
-}
+  }
 
-function renderFeed(sel, countSel, rows){
-  rows = rows || [];
-  $(countSel).textContent = rows.length;
-  $(sel).innerHTML = rows.length ? rows.map(r => `
+  function renderFeed(sel, countSel, rows) {
+    rows = rows || [];
+    $(countSel).textContent = rows.length;
+    $(sel).innerHTML = rows.length ? rows.map(r => `
     <div class="row">
       <div class="av" style="background:${r.color}">${r.who}</div>
       <div>
@@ -771,202 +1820,241 @@ function renderFeed(sel, countSel, rows){
         <div class="t2">${r.t} ago</div>
       </div>
     </div>`).join('') : `<div class="empty">No recent activity.</div>`;
-}
-
-async function render(){
-  try {
-    const d = await getData();
-    STATE.data = d;
-    renderMetrics(d.metrics);
-    renderAttention(d.attention);
-    renderSprint(d.sprint);
-    renderFeed('#jira-feed', '#jira-count', d.jira);
-    renderFeed('#figma-feed', '#figma-count', d.figma);
-    $('#srcmode').textContent = STATE.mode === 'live' ? 'LIVE' : 'DEMO';
-    $('#footnote').textContent = STATE.mode === 'live'
-      ? 'connected via your token proxy'
-      : 'synthetic sandbox — connect tools to go live';
-    $('#demobar').classList.toggle('show', STATE.mode === 'demo');
-    lastSync = Date.now();
-    updateSyncLabel();
-  } catch (e) {
-    console.error('Render failed:', e);
-    $('#synced').textContent = 'sync failed';
   }
-}
 
-/* ============================================================
-   AUTH  —  passwordless (magic-link UX + Google), free/client-side
-   ============================================================ */
-function showLogin(){ $('#login-overlay').classList.add('active'); $('#email')?.focus(); }
-function hideLogin(){ $('#login-overlay').classList.remove('active'); }
-
-function signIn(email){
-  STATE.session = email;
-  store.set(LS.session, email);
-  hideLogin();
-  // First-time live users land in the wizard; returning users go to the board.
-  const conns = store.get(LS.conns, null);
-  if (!conns && STATE.mode !== 'demo') { STATE.mode = 'live'; store.set(LS.mode, 'live'); openWizard(); }
-  else { STATE.mode = STATE.mode || 'live'; store.set(LS.mode, STATE.mode); render(); }
-}
-
-$('#login-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const email = $('#email').value.trim();
-  const err = $('#login-error');
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    err.textContent = 'Enter a valid email address.'; err.classList.add('show');
-    $('#login-card').classList.add('shake'); setTimeout(() => $('#login-card').classList.remove('shake'), 400);
-    return;
+  async function render() {
+    try {
+      const d = await getData();
+      STATE.data = d;
+      renderMetrics(d.metrics);
+      renderAttention(d.attention);
+      renderSprint(d.sprint);
+      renderFeed('#jira-feed', '#jira-count', d.jira);
+      renderFeed('#figma-feed', '#figma-count', d.figma);
+      $('#srcmode').textContent = STATE.mode === 'live' ? 'LIVE' : 'DEMO';
+      $('#footnote').textContent = STATE.mode === 'live'
+        ? 'connected via your token proxy'
+        : 'synthetic sandbox — connect tools to go live';
+      $('#demobar').classList.toggle('show', STATE.mode === 'demo');
+      lastSync = Date.now();
+      updateSyncLabel();
+    } catch (e) {
+      console.error('Render failed:', e);
+      $('#synced').textContent = 'sync failed';
+    }
   }
-  err.classList.remove('show');
-  // Simulated magic link: show the "sent" state, then let them "open" it.
-  $('#login-form').style.display = 'none';
-  $('.demo-link').style.display = 'none';
-  $('#sent-email').textContent = email;
-  $('#sent-state').classList.add('show');
-  $('#open-link').onclick = () => {
-    $('#sent-state').classList.remove('show');
-    $('#login-form').style.display = '';
-    $('.demo-link').style.display = '';
-    signIn(email);
-  };
-});
 
-$('#google-btn').addEventListener('click', () => {
-  // Stand-in for a Google OAuth round-trip. Swap for a real redirect later.
-  signIn('you@gmail.com');
-});
+  /* ============================================================
+     AUTH  —  passwordless (magic-link UX + Google), free/client-side
+     ============================================================ */
+  function showLogin() { $('#login-overlay').classList.add('active'); $('#email')?.focus(); }
+  function hideLogin() { $('#login-overlay').classList.remove('active'); }
 
-$('#demo-entry').addEventListener('click', enterDemo);
-$('#connect-real').addEventListener('click', () => { STATE.mode = 'live'; store.set(LS.mode, 'live'); openWizard(); });
+  function signIn(email) {
+    STATE.session = email;
+    store.set(LS.session, email);
+    hideLogin();
+    // First-time live users land in Settings; returning users go to the board.
+    const conns = store.get(LS.conns, null);
+    if (!conns && STATE.mode !== 'demo') { STATE.mode = 'live'; store.set(LS.mode, 'live'); openSettings(); }
+    else { STATE.mode = STATE.mode || 'live'; store.set(LS.mode, STATE.mode); render(); }
+  }
 
-function enterDemo(){
-  STATE.mode = 'demo'; STATE.session = 'demo';
-  store.set(LS.mode, 'demo'); store.set(LS.session, 'demo');
-  hideLogin();
-  render();
-}
+  $('#login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = $('#email').value.trim();
+    const err = $('#login-error');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      err.textContent = 'Enter a valid email address.'; err.classList.add('show');
+      $('#login-card').classList.add('shake'); setTimeout(() => $('#login-card').classList.remove('shake'), 400);
+      return;
+    }
+    err.classList.remove('show');
+    // Simulated magic link: show the "sent" state, then let them "open" it.
+    $('#login-form').style.display = 'none';
+    $('.demo-link').style.display = 'none';
+    $('#sent-email').textContent = email;
+    $('#sent-state').classList.add('show');
+    $('#open-link').onclick = () => {
+      $('#sent-state').classList.remove('show');
+      $('#login-form').style.display = '';
+      $('.demo-link').style.display = '';
+      signIn(email);
+    };
+  });
 
-/* ============================================================
-   CONNECTION WIZARD  —  test each integration, show a sample
-   ============================================================ */
-const INTEGRATIONS = [
-  { id:'jira',    name:'Jira',    color:'var(--blue)',   ico:'JR', sample:'4 issues · PAY-412, PAY-398…' },
-  { id:'figma',   name:'Figma',   color:'var(--violet)', ico:'FG', sample:'2 files · 6 open comments' },
-  { id:'clickup', name:'ClickUp', color:'var(--pink)',   ico:'CU', sample:'5 tasks · 2 due this week' },
-  { id:'slack',   name:'Slack',   color:'var(--sky)',    ico:'SL', sample:'3 unread mentions' },
-];
+  $('#google-btn').addEventListener('click', () => {
+    // Stand-in for a Google OAuth round-trip. Swap for a real redirect later.
+    signIn('you@gmail.com');
+  });
 
-function openWizard(){
-  const conns = store.get(LS.conns, {});
-  $('#wiz-list').innerHTML = INTEGRATIONS.map(it => `
-    <div class="wiz-row" data-id="${it.id}">
-      <div class="wiz-ico" style="background:${it.color};color:var(--ink)">${it.ico}</div>
-      <div class="wiz-meta">
-        <div class="n">${it.name}</div>
-        <div class="s">${it.id === 'clickup' || it.id === 'slack' ? 'Scaffolded — add a token in the proxy to go live' : 'Reads via your token proxy'}</div>
+  $('#demo-entry').addEventListener('click', enterDemo);
+  $('#connect-real').addEventListener('click', openSettings);
+
+  function enterDemo() {
+    STATE.mode = 'demo'; STATE.session = 'demo';
+    store.set(LS.mode, 'demo'); store.set(LS.session, 'demo');
+    hideLogin();
+    render();
+  }
+
+  /* ============================================================
+     SETTINGS PAGE  —  paste API keys, test each integration
+     ------------------------------------------------------------
+     Keys are persisted to localStorage (this browser only) for the
+     connection flow. In a real deployment the secrets belong in the
+     Worker; these fields mirror the names the proxy expects.
+     ============================================================ */
+  const INTEGRATIONS = [
+    {
+      id: 'jira', name: 'Jira', color: 'var(--blue)', ico: 'JR', sample: '4 issues · PAY-412, PAY-398…',
+      fields: [{ k: 'JIRA_SITE', label: 'Site', ph: 'company.atlassian.net' }, { k: 'JIRA_EMAIL', label: 'Email', ph: 'you@company.com' },
+      { k: 'JIRA_TOKEN', label: 'API token', ph: 'ATATT…', pw: true }, { k: 'JIRA_PROJECT', label: 'Project key', ph: 'PAY' }]
+    },
+    {
+      id: 'figma', name: 'Figma', color: 'var(--violet)', ico: 'FG', sample: '2 files · 6 open comments',
+      fields: [{ k: 'FIGMA_TOKEN', label: 'Personal access token', ph: 'figd_…', pw: true, full: true },
+      { k: 'FIGMA_FILES', label: 'File keys (comma-separated)', ph: 'abc123,def456', full: true }]
+    },
+    {
+      id: 'clickup', name: 'ClickUp', color: 'var(--pink)', ico: 'CU', sample: '5 tasks · 2 due this week',
+      fields: [{ k: 'CLICKUP_TOKEN', label: 'API token', ph: 'pk_…', pw: true }, { k: 'CLICKUP_TEAM', label: 'Team / workspace id', ph: '9001234' }]
+    },
+    {
+      id: 'slack', name: 'Slack', color: 'var(--sky)', ico: 'SL', sample: '3 unread mentions',
+      fields: [{ k: 'SLACK_TOKEN', label: 'Bot / user token', ph: 'xoxb-…', pw: true, full: true }]
+    },
+  ];
+
+  function openSettings() {
+    const conns = store.get(LS.conns, {});
+    $('#set-list').innerHTML = INTEGRATIONS.map(it => `
+    <div class="set-row" data-id="${it.id}">
+      <div class="set-head">
+        <div class="wiz-ico" style="background:${it.color}">${it.ico}</div>
+        <div class="meta">
+          <div class="n">${it.name}</div>
+          <div class="s">${it.id === 'clickup' || it.id === 'slack' ? 'Scaffolded — paste a token to go live' : 'Reads via your token proxy'}</div>
+        </div>
+        <button class="wiz-test ${conns[it.id] ? 'ok' : ''}" data-id="${it.id}">${conns[it.id] ? '✓ Connected' : 'Test connection'}</button>
+      </div>
+      <div class="set-fields">
+        ${it.fields.map(f => `
+          <div class="field ${f.full ? 'full' : ''}">
+            <label for="key-${f.k}">${f.label}</label>
+            <input id="key-${f.k}" data-k="${f.k}" type="${f.pw ? 'password' : 'text'}"
+                   placeholder="${f.ph}" autocomplete="off" value="${(STATE.keys[f.k] || '').replace(/"/g, '&quot;')}">
+          </div>`).join('')}
         <div class="sample ${conns[it.id] ? 'show' : ''}" id="sample-${it.id}">✓ Pulled ${it.sample}</div>
       </div>
-      <button class="wiz-test ${conns[it.id] ? 'ok' : ''}" data-id="${it.id}">${conns[it.id] ? '✓ Connected' : 'Test connection'}</button>
     </div>`).join('');
 
-  $$('#wiz-list .wiz-test').forEach(btn => {
-    if (btn.classList.contains('ok')) return;
-    btn.addEventListener('click', () => testConnection(btn.dataset.id, btn));
+    $$('#set-list .wiz-test').forEach(btn => btn.addEventListener('click', () => testConnection(btn.dataset.id, btn)));
+    $('#settings-page').classList.add('active');
+  }
+
+  function collectKeys() {
+    const keys = {};
+    $$('#set-list input[data-k]').forEach(inp => { if (inp.value.trim()) keys[inp.dataset.k] = inp.value.trim(); });
+    STATE.keys = keys; store.set(LS.keys, keys);
+    return keys;
+  }
+
+  async function testConnection(id, btn) {
+    collectKeys(); // persist whatever's typed before probing
+    btn.classList.remove('ok'); btn.classList.add('testing'); btn.textContent = 'Testing…';
+    const sampleText = INTEGRATIONS.find(i => i.id === id).sample;
+    try {
+      // Bounded probe of the live proxy; fall back to the synthetic sample
+      // so the test always resolves (and never hangs on "Testing…").
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 1200);
+      const r = await fetch(CONFIG.proxyUrl, { headers: { 'Accept': 'application/json' }, signal: ctl.signal });
+      clearTimeout(t);
+      if (r.ok) await r.json();
+    } catch { /* proxy not running — use synthetic sample */ }
+    await new Promise(res => setTimeout(res, 500)); // perceptible test beat
+
+    btn.classList.remove('testing');
+    btn.classList.add('ok'); btn.textContent = '✓ Connected';
+    const s = $('#sample-' + id); s.textContent = '✓ Pulled ' + sampleText; s.classList.add('show');
+    const conns = store.get(LS.conns, {}); conns[id] = true; store.set(LS.conns, conns);
+  }
+
+  function closeSettings() { $('#settings-page').classList.remove('active'); }
+
+  $('#set-save').addEventListener('click', () => {
+    collectKeys();
+    closeSettings();
+    STATE.mode = 'live'; store.set(LS.mode, 'live');
+    render();
   });
-  $('#wizard-overlay').classList.add('active');
-}
+  $('#set-demo').addEventListener('click', () => { closeSettings(); enterDemo(); });
+  $('#settings-back').addEventListener('click', () => { closeSettings(); if (STATE.session) render(); });
+  $('#connections').addEventListener('click', openSettings);
 
-async function testConnection(id, btn){
-  btn.classList.add('testing'); btn.textContent = 'Testing…';
-  // Try the live proxy; fall back to the synthetic sample so the wizard
-  // always demonstrates the green-check + sample-of-what-it-pulled moment.
-  let sampleText = INTEGRATIONS.find(i => i.id === id).sample;
-  try {
-    // Bounded probe — if the proxy isn't reachable, fall back to the
-    // synthetic sample so the wizard never hangs on "Testing…".
-    const ctl = new AbortController();
-    const t = setTimeout(() => ctl.abort(), 1200);
-    const r = await fetch(CONFIG.proxyUrl, { headers: { 'Accept': 'application/json' }, signal: ctl.signal });
-    clearTimeout(t);
-    if (r.ok) await r.json();
-  } catch { /* proxy not running — use synthetic sample */ }
-  await new Promise(res => setTimeout(res, 500)); // perceptible test beat
+  /* ============================================================
+     VIEW TOGGLE  (All / My Day)  +  SOURCE TABS
+     ============================================================ */
+  $('#viewtoggle').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    STATE.view = b.dataset.view;
+    $$('#viewtoggle button').forEach(x => x.classList.toggle('active', x === b));
+    if (STATE.data) renderAttention(STATE.data.attention);
+  });
 
-  btn.classList.remove('testing');
-  btn.classList.add('ok'); btn.textContent = '✓ Connected';
-  const s = $('#sample-' + id); s.textContent = '✓ Pulled ' + sampleText; s.classList.add('show');
-  const conns = store.get(LS.conns, {}); conns[id] = true; store.set(LS.conns, conns);
-}
+  $('#tabs').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    STATE.src = b.dataset.src;
+    $$('#tabs button').forEach(x => x.classList.toggle('active', x === b));
+    if (STATE.data) renderAttention(STATE.data.attention);
+  });
 
-$('#wiz-done').addEventListener('click', () => {
-  $('#wizard-overlay').classList.remove('active');
-  STATE.mode = 'live'; store.set(LS.mode, 'live');
-  render();
-});
-$('#wiz-skip').addEventListener('click', () => {
-  $('#wizard-overlay').classList.remove('active');
-  enterDemo();
-});
-$('#connections').addEventListener('click', openWizard);
+  /* ---------- clock + sync ---------- */
+  let lastSync = Date.now();
+  function updateSyncLabel() {
+    const s = Math.floor((Date.now() - lastSync) / 1000);
+    let txt = 'synced just now';
+    if (s >= 60) txt = `synced ${Math.floor(s / 60)}m ago`;
+    else if (s >= 5) txt = `synced ${s}s ago`;
+    $('#synced').textContent = txt;
+  }
+  function tick() {
+    const n = new Date();
+    $('#clock').textContent = n.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    updateSyncLabel();
+  }
 
-/* ============================================================
-   VIEW TOGGLE  (All / My Day)
-   ============================================================ */
-$('#viewtoggle').addEventListener('click', (e) => {
-  const b = e.target.closest('button'); if (!b) return;
-  STATE.view = b.dataset.view;
-  $$('#viewtoggle button').forEach(x => x.classList.toggle('active', x === b));
-  if (STATE.data) renderAttention(STATE.data.attention);
-});
+  /* ---------- manual refresh ---------- */
+  const rbtn = $('#refresh');
+  rbtn.addEventListener('click', async () => {
+    if (rbtn.classList.contains('spinning')) return;
+    rbtn.classList.add('spinning');
+    await render();
+    setTimeout(() => rbtn.classList.remove('spinning'), 600);
+  });
 
-/* ---------- clock + sync ---------- */
-let lastSync = Date.now();
-function updateSyncLabel(){
-  const s = Math.floor((Date.now() - lastSync) / 1000);
-  let txt = 'synced just now';
-  if (s >= 60) txt = `synced ${Math.floor(s/60)}m ago`;
-  else if (s >= 5) txt = `synced ${s}s ago`;
-  $('#synced').textContent = txt;
-}
-function tick(){
-  const n = new Date();
-  $('#clock').textContent = n.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  updateSyncLabel();
-}
+  /* ---------- relative time ---------- */
+  function ago(iso) {
+    if (!iso) return '';
+    const s = Math.floor((Date.now() - new Date(iso)) / 1000);
+    if (s < 60) return s + 's';
+    if (s < 3600) return Math.floor(s / 60) + 'm';
+    if (s < 86400) return Math.floor(s / 3600) + 'h';
+    return Math.floor(s / 86400) + 'd';
+  }
 
-/* ---------- manual refresh ---------- */
-const rbtn = $('#refresh');
-rbtn.addEventListener('click', async () => {
-  if (rbtn.classList.contains('spinning')) return;
-  rbtn.classList.add('spinning');
-  await render();
-  setTimeout(() => rbtn.classList.remove('spinning'), 600);
-});
+  /* ============================================================
+     BOOT
+     ============================================================ */
+  setInterval(tick, 1000); tick();
 
-/* ---------- relative time ---------- */
-function ago(iso){
-  if (!iso) return '';
-  const s = Math.floor((Date.now() - new Date(iso)) / 1000);
-  if (s < 60) return s + 's';
-  if (s < 3600) return Math.floor(s/60) + 'm';
-  if (s < 86400) return Math.floor(s/3600) + 'h';
-  return Math.floor(s/86400) + 'd';
-}
-
-/* ============================================================
-   BOOT
-   ============================================================ */
-setInterval(tick, 1000); tick();
-
-if (STATE.session) {
-  // Returning user — straight to the board in their last mode.
-  STATE.mode = STATE.mode || 'demo';
-  render();
-} else {
-  showLogin();
-}
-setInterval(() => { if (STATE.session) render(); }, CONFIG.refreshMs);
+  if (STATE.session) {
+    // Returning user — straight to the board in their last mode.
+    STATE.mode = STATE.mode || 'demo';
+    render();
+  } else {
+    showLogin();
+  }
+  setInterval(() => { if (STATE.session) render(); }, CONFIG.refreshMs);
 </script>
